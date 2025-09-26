@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farland Simplificado - Aprimorado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* Estilos Globais */
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Splash Screen */
+        #splash-screen { background-color: #1a202c; transition: opacity 0.5s ease-out; }
+        #splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        /* Conteúdo Principal */
+        #main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 1s ease-in;
+            opacity: 0;
+            visibility: hidden;
+            padding: 1rem;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Seções de Overlay (Formulários, Modais, Visualização) */
+        .overlay-section {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; transition: opacity 0.3s ease-in-out;
+            opacity: 0; pointer-events: none;
+        }
+        .overlay-section:not(.hidden) { opacity: 1; pointer-events: auto; }
+        .form-container {
+            background-color: #2d3748; max-height: 90vh; overflow-y: auto; padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); max-width: 600px;
+            width: 90%; border-radius: 1rem; border: 1px solid #4a5568;
+        }
+
+        /* Navegação */
+        .nav-button { background-color: #374151; color: #cbd5e0; transition: all 0.2s ease-in-out; }
+        .nav-button.active {
+            background-color: #4f46e5; color: white;
+            box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Grid de Cards */
+        #content-display {
+            height: calc(100% - 4rem); /* Ajusta a altura para dar espaço ao título */
+        }
+        #content-display .grid {
+            height: 100%;
+        }
+        .rpg-thumbnail {
+            width: 100%; height: 100%; aspect-ratio: 120 / 160; border-radius: 12px;
+            position: relative; background-color: #4a5568;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            will-change: transform;
+        }
+        .rpg-thumbnail:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+        .rpg-thumbnail.menu-expanded {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+            z-index: 20;
+        }
+        .add-card-button {
+            width: 100%; height: 100%; aspect-ratio: 120 / 160; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 2px dashed #4a5568; color: #a0aec0; background-color: transparent;
+            transition: all 0.2s;
+        }
+        .add-card-button:hover { border-color: #6366f1; color: #6366f1; }
+        
+        /* Ações e Menu do Thumbnail */
+        .thumbnail-actions { position: absolute; top: 8px; right: 8px; }
+        .thumb-btn {
+            width: 28px; height: 28px; border-radius: 50%;
+            background-color: rgba(26, 32, 44, 0.7);
+            backdrop-filter: blur(5px);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background-color 0.2s;
+        }
+        .thumb-btn:hover { background-color: #4f46e5; }
+        .thumbnail-menu {
+            position: absolute; top: calc(100% + 4px); right: 0; background-color: #2a3447;
+            border: 1px solid #4a5568; border-radius: 8px; padding: 0.5rem; z-index: 200;
+            opacity: 0; transform: scale(0.95) translateY(-10px);
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+            pointer-events: none; min-width: 180px;
+        }
+        .thumbnail-menu.active { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+        .menu-item {
+            display: flex; align-items: center; gap: 0.75rem; background: none; border: none;
+            color: #d1d5db; width: 100%; padding: 0.5rem 0.75rem; text-align: left;
+            border-radius: 6px; font-size: 14px; transition: background-color 0.2s, color 0.2s;
+        }
+        .menu-item:hover { background-color: #4f46e5; color: white; }
+        .menu-item i { width: 16px; text-align: center; }
+
+        /* Estilos de Formulário e Modais */
+        .file-upload-input::-webkit-file-upload-button {
+            background-color: #6366f1; color: white; padding: 0.5rem 1rem;
+            border: none; border-radius: 9999px; font-weight: 600; margin-right: 1rem; cursor: pointer;
+        }
+        .file-upload-input::-webkit-file-upload-button:hover { background-color: #4f46e5; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #2d3748; }
+        ::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #718096; }
+
+        /* Novo Design de Card Simplificado */
+        .sheet-card {
+            border-radius: 1.25rem;
+            border: 2px solid var(--glow-color, #4a5568);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        .sheet-card-text-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sheet-card-divider {
+            height: 2px;
+            width: 4rem;
+            background: var(--glow-color, #a0aec0);
+            margin: 0.75rem 0;
+            border-radius: 1px;
+        }
+    </style>
+</head>
+<body class="overflow-hidden">
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="flex flex-col items-center justify-center">
+            <i class="fas fa-dice-d20 text-8xl text-white animate-spin"></i>
+            <p class="mt-4 text-xl font-bold text-white tracking-widest animate-pulse">CARREGANDO...</p>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div id="main-content" class="flex-grow w-full">
+        <main class="w-full h-full max-w-7xl mx-auto flex-grow bg-gray-800 rounded-2xl shadow-2xl flex flex-col items-center pt-4">
+            <div id="content-display" class="w-full h-full flex flex-col items-center"></div>
+        </main>
+    </div>
+
+    <!-- Overlays -->
+    <div id="entidade-sheet-container" class="overlay-section hidden"></div>
+    <div id="item-magico-sheet-container" class="overlay-section hidden"></div>
+    <div id="entidade-creation-section" class="overlay-section hidden"></div>
+    <div id="item-magico-creation-section" class="overlay-section hidden"></div>
+    <div id="text-parser-modal" class="overlay-section hidden"></div>
+
+    <!-- Template para o formulário de Entidade -->
+    <template id="entidade-form-template">
+        <div class="form-container">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="entidade-form-title" class="text-xl md:text-2xl font-bold text-indigo-300">Nova Entidade</h2>
+                <div class="flex gap-2">
+                     <button data-action="parse-text-modal" data-type="entidade" class="text-gray-400 hover:text-white text-lg font-bold p-2 rounded-full hover:bg-gray-600"><i class="fas fa-paste"></i></button>
+                    <button data-action="close-form" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+                </div>
+            </div>
+            <form id="entidadeForm" class="space-y-4">
+                <input type="hidden" id="entidadeId">
+                <div>
+                    <label for="entidadeNome" class="block text-sm font-semibold mb-1">Nome</label>
+                    <input type="text" id="entidadeNome" placeholder="Ex: O Deus do Trovão" required class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label for="entidadeReligiao" class="block text-sm font-semibold mb-1">Religião / Panteão</label>
+                    <input type="text" id="entidadeReligiao" placeholder="Ex: Panteão Nórdico" class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label for="entidadeFuncao" class="block text-sm font-semibold mb-1">Função</label>
+                    <input type="text" id="entidadeFuncao" placeholder="Ex: Protetor dos Reinos" class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label for="entidadeDescricao" class="block text-sm font-semibold mb-1">Descrição</label>
+                    <textarea id="entidadeDescricao" rows="4" placeholder="Descreva a entidade, seus poderes e história..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"></textarea>
+                </div>
+                <div>
+                    <label for="entidadeImageUpload" class="block text-sm font-semibold mb-1 cursor-pointer">Imagem da Entidade</label>
+                    <input type="file" id="entidadeImageUpload" accept="image/*" class="w-full p-2 bg-gray-700 rounded-lg border border-gray-600 file-upload-input">
+                </div>
+                <button type="submit" id="entidadeSubmitButton" class="w-full mt-4 py-3 px-4 rounded-full text-lg font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-transform transform hover:scale-105">
+                    Criar Entidade
+                </button>
+            </form>
+        </div>
+    </template>
+    
+    <!-- Template para o formulário de Item Mágico -->
+    <template id="item-magico-form-template">
+         <div class="form-container">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="item-magico-form-title" class="text-xl md:text-2xl font-bold text-amber-300">Novo Item Mágico</h2>
+                 <div class="flex gap-2">
+                     <button data-action="parse-text-modal" data-type="item-magico" class="text-gray-400 hover:text-white text-lg font-bold p-2 rounded-full hover:bg-gray-600"><i class="fas fa-paste"></i></button>
+                    <button data-action="close-form" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+                </div>
+            </div>
+            <form id="itemMagicoForm" class="space-y-4">
+                <input type="hidden" id="itemMagicoId">
+                <div>
+                    <label for="itemMagicoNome" class="block text-sm font-semibold mb-1">Nome</label>
+                    <input type="text" id="itemMagicoNome" placeholder="Ex: Martelo dos Deuses" required class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label for="itemMagicoFuncao" class="block text-sm font-semibold mb-1">Função</label>
+                    <input type="text" id="itemMagicoFuncao" placeholder="Ex: Arma de arremesso lendária" class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label for="itemMagicoDescricao" class="block text-sm font-semibold mb-1">Descrição</label>
+                    <textarea id="itemMagicoDescricao" rows="4" placeholder="Descreva o item, seus poderes e história..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"></textarea>
+                </div>
+                <div>
+                    <label for="itemMagicoImageUpload" class="block text-sm font-semibold mb-1 cursor-pointer">Imagem do Item</label>
+                    <input type="file" id="itemMagicoImageUpload" accept="image/*" class="w-full p-2 bg-gray-700 rounded-lg border border-gray-600 file-upload-input">
+                </div>
+                <button type="submit" id="itemMagicoSubmitButton" class="w-full mt-4 py-3 px-4 rounded-full text-lg font-bold text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 transition-transform transform hover:scale-105">
+                    Criar Item
+                </button>
+            </form>
+        </div>
+    </template>
+    
+    <!-- Template para o Modal de Análise de Texto -->
+    <template id="text-parser-modal-template">
+        <div class="form-container">
+             <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-300">Preencher com Texto</h2>
+                <button data-action="close-form" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            </div>
+            <p class="text-gray-400 mb-4 text-sm">Cole o texto abaixo. Use o formato "Campo: Valor".</p>
+            <textarea id="text-parser-input" rows="10" class="w-full p-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="Exemplo:&#10;Nome: Thor&#10;Religião: Panteão Nórdico&#10;..."></textarea>
+            <button id="text-parser-submit" data-action="submit-text-parser" class="w-full mt-4 py-2 px-4 rounded-full font-bold text-white bg-indigo-600 hover:bg-indigo-700">Preencher Formulário</button>
+        </div>
+    </template>
+
+    <!-- Navegação Inferior -->
+    <nav class="fixed bottom-3 left-1/2 -translate-x-1/2 bg-gray-900/80 backdrop-blur-sm rounded-full p-2 flex items-center gap-2 z-50 shadow-lg border border-gray-700">
+        <button class="nav-button px-4 py-2 text-sm md:px-6 md:py-3 md:text-lg font-semibold rounded-full flex items-center gap-2 active" data-target="entidades" title="Entidades">
+            <i class="fas fa-users"></i><span class="hidden md:inline">Entidades</span>
+        </button>       
+        <button class="nav-button px-4 py-2 text-sm md:px-6 md:py-3 md:text-lg font-semibold rounded-full flex items-center gap-2" data-target="itens-magicos" title="Itens Mágicos">
+            <i class="fas fa-magic"></i><span class="hidden md:inline">Itens Mágicos</span>
+        </button>
+    </nav>
+
+    <script type="module">
+        // --- MÓDULO DE BANCO DE DADOS (IndexedDB) ---
+        const DB_NAME = 'rpgSimplificadoDB_v2';
+        const DB_VERSION = 1;
+        let db;
+
+        const openDatabase = () => new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onupgradeneeded = e => {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains('entidades')) db.createObjectStore('entidades', { keyPath: 'id' });
+                if (!db.objectStoreNames.contains('itensMagicos')) db.createObjectStore('itensMagicos', { keyPath: 'id' });
+            };
+            request.onsuccess = e => { db = e.target.result; resolve(db); };
+            request.onerror = e => reject(e.target.error);
+        });
+
+        const saveData = (store, data) => new Promise((resolve, reject) => db.transaction(store, 'readwrite').objectStore(store).put(data).onsuccess = resolve);
+        const getData = (store, key) => new Promise((resolve, reject) => db.transaction(store, 'readonly').objectStore(store)[key ? 'get' : 'getAll'](key).onsuccess = e => resolve(e.target.result));
+        const removeData = (store, id) => new Promise((resolve, reject) => db.transaction(store, 'readwrite').objectStore(store).delete(id).onsuccess = resolve);
+        
+        // --- FUNÇÕES AUXILIARES ---
+        const readFileAsArrayBuffer = file => new Promise((resolve) => {
+            if (!file) return resolve(null);
+            const reader = new FileReader();
+            reader.onload = e => resolve(e.target.result);
+            reader.readAsArrayBuffer(file);
+        });
+
+        const bufferToBlob = (buffer, mimeType) => new Blob([buffer], { type: mimeType });
+
+        // --- RENDERERS DE CARDS ---
+        const renderCardSheet = (data, isModal, type) => {
+            const imageUrl = data.image ? URL.createObjectURL(bufferToBlob(data.image, data.imageMimeType)) : `https://placehold.co/600x800/2d3748/e2e8f0?text=${data.nome || '?'}`;
+            const isEntidade = type === 'entidade';
+            const colorClass = isEntidade ? 'indigo' : 'amber';
+            const glowColor = isEntidade ? '#818cf8' : '#fbbf24'; // indigo-400 and amber-400
+
+            const cardHtml = `
+                <div id="card-to-download" class="sheet-card relative w-full h-full max-h-[90vh] aspect-[3/4] bg-gray-900 text-white flex flex-col" style="--glow-color: ${glowColor}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; max-width: 26rem;">
+                    
+                    <div class="relative w-full h-full flex flex-col z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                        ${isModal ? `<button data-action="close-sheet" class="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center z-20"><i class="fas fa-times"></i></button>` : ''}
+                        
+                        <div class="mt-auto p-4 md:p-6 w-full text-left">
+                            <div class="sheet-card-text-panel">
+                                <p class="text-sm font-medium text-${colorClass}-300">${isEntidade ? data.religiao : data.funcao}</p>
+                                <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-white">${data.nome}</h2>
+                                <div class="sheet-card-divider"></div>
+                                <p class="text-gray-300 text-xs leading-relaxed max-h-40 md:max-h-48 overflow-y-auto pr-2">${data.descricao}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            return { html: cardHtml, blobUrl: imageUrl };
+        };
+
+        // --- MANIPULADOR DE CONTEÚDO ---
+        const contentDisplay = document.getElementById('content-display');
+        let currentView = 'entidades';
+
+        const renderContent = async (target) => {
+            currentView = target;
+            contentDisplay.innerHTML = `<div class="w-full text-center mb-6 mt-2"><h2 class="text-2xl md:text-3xl font-bold text-gray-200">${target === 'entidades' ? 'Entidades' : 'Itens Mágicos'}</h2></div>`;
+            const grid = document.createElement('div');
+            grid.className = 'grid gap-4 w-full justify-items-center grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 overflow-y-auto p-6 pt-0 pb-24';
+            
+            const isEntidades = target === 'entidades';
+            const storeName = isEntidades ? 'entidades' : 'itensMagicos';
+            const action = isEntidades ? 'add-entidade' : 'add-item-magico';
+            const title = isEntidades ? 'Adicionar Entidade' : 'Adicionar Item';
+            const data = await getData(storeName);
+
+            grid.innerHTML = `<div class="relative w-full h-full"><button class="add-card-button absolute inset-0" data-action="${action}"><i class="fas fa-plus text-2xl mb-2"></i><span class="text-sm font-semibold">${title}</span></button></div>`;
+            
+            data.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'rpg-thumbnail bg-cover bg-center shadow-lg relative';
+                itemDiv.dataset.id = item.id;
+                itemDiv.dataset.type = isEntidades ? 'entidade' : 'item-magico';
+                
+                const imageUrl = item.image ? URL.createObjectURL(bufferToBlob(item.image, item.imageMimeType)) : `https://placehold.co/300x400/2d3748/e2e8f0?text=${item.nome || '?'}`;
+                itemDiv.style.backgroundImage = `url('${imageUrl}')`;
+
+                itemDiv.innerHTML = `
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent cursor-pointer" data-action="view"></div>
+                    <div class="absolute bottom-0 p-3 text-white w-full cursor-pointer" data-action="view">
+                        <h3 class="font-bold text-sm truncate">${item.nome}</h3>
+                    </div>
+                    <div class="thumbnail-actions z-10">
+                        <button class="thumb-btn thumb-btn-menu"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="thumbnail-menu">
+                            <button class="menu-item" data-action="edit"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="menu-item" data-action="download"><i class="fas fa-download"></i> Baixar</button>
+                            <button class="menu-item" data-action="remove"><i class="fas fa-trash-alt"></i> Excluir</button>
+                        </div>
+                    </div>`;
+                grid.appendChild(itemDiv);
+            });
+            contentDisplay.appendChild(grid);
+        };
+        
+        // --- FUNÇÕES DE AÇÃO ---
+        const downloadCard = async (id, type) => {
+            const storeName = type === 'entidade' ? 'entidades' : 'itensMagicos';
+            const data = await getData(storeName, id);
+            const { html, blobUrl } = renderCardSheet(data, false, type);
+            
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'fixed';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '0';
+            tempContainer.innerHTML = html;
+            document.body.appendChild(tempContainer);
+            
+            const cardElement = tempContainer.querySelector('#card-to-download');
+            
+            html2canvas(cardElement, { 
+                useCORS: true, 
+                backgroundColor: null,
+                width: 600, 
+                height: 800
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `${data.nome.replace(/ /g, '_')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                document.body.removeChild(tempContainer);
+                URL.revokeObjectURL(blobUrl);
+            });
+        };
+        
+        const openTextParser = (type) => {
+            const modal = document.getElementById('text-parser-modal');
+            const template = document.getElementById('text-parser-modal-template');
+            modal.innerHTML = template.innerHTML;
+            modal.dataset.type = type;
+            modal.classList.remove('hidden');
+        };
+
+        const parseAndFillForm = (type) => {
+            const text = document.getElementById('text-parser-input').value;
+            const camelCaseType = type.replace(/-([a-z])/g, g => g[1].toUpperCase());
+            const fieldMap = type === 'entidade' ? {
+                "nome": `${camelCaseType}Nome`,
+                "religião": `${camelCaseType}Religiao`,
+                "panteão": `${camelCaseType}Religiao`,
+                "função": `${camelCaseType}Funcao`,
+                "descrição": `${camelCaseType}Descricao`
+            } : {
+                "nome": `${camelCaseType}Nome`,
+                "função": `${camelCaseType}Funcao`,
+                "descrição": `${camelCaseType}Descricao`
+            };
+
+            const lines = text.split('\n');
+            lines.forEach(line => {
+                const parts = line.split(/:(.*)/s);
+                if (parts.length > 1) {
+                    const key = parts[0].trim().toLowerCase();
+                    const value = parts[1].trim();
+                    if (fieldMap[key] && document.getElementById(fieldMap[key])) {
+                        document.getElementById(fieldMap[key]).value = value;
+                    }
+                }
+            });
+            document.getElementById('text-parser-modal').classList.add('hidden');
+        };
+
+        // --- INICIALIZAÇÃO E EVENTOS ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            await openDatabase();
+            renderContent('entidades');
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+                document.getElementById('main-content').style.visibility = 'visible';
+                document.getElementById('main-content').style.opacity = '1';
+            }, 1500);
+        });
+
+        document.querySelector('nav').addEventListener('click', e => {
+            const button = e.target.closest('.nav-button');
+            if (button) {
+                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                renderContent(button.dataset.target);
+            }
+        });
+
+        document.addEventListener('click', async e => {
+            // Lógica para abrir/fechar o menu do card
+            const menuButton = e.target.closest('.thumb-btn-menu');
+            if (menuButton) {
+                e.stopPropagation();
+                const menu = menuButton.nextElementSibling;
+                const card = menuButton.closest('.rpg-thumbnail');
+                const wasActive = menu.classList.contains('active');
+                
+                // Fecha todos os outros menus
+                document.querySelectorAll('.thumbnail-menu.active').forEach(m => m.classList.remove('active'));
+                document.querySelectorAll('.rpg-thumbnail.menu-expanded').forEach(c => c.classList.remove('menu-expanded'));
+                
+                if (!wasActive) {
+                    menu.classList.add('active');
+                    card.classList.add('menu-expanded');
+                }
+                return; // Impede que o resto do listener seja executado
+            }
+
+            // Fecha o menu se clicar fora
+            if (!e.target.closest('.thumbnail-menu')) {
+                 document.querySelectorAll('.thumbnail-menu.active').forEach(m => m.classList.remove('active'));
+                document.querySelectorAll('.rpg-thumbnail.menu-expanded').forEach(c => c.classList.remove('menu-expanded'));
+            }
+
+            // Lógica para outras ações
+            const actionTarget = e.target.closest('[data-action]');
+            if (!actionTarget) return;
+
+            const action = actionTarget.dataset.action;
+            const card = actionTarget.closest('.rpg-thumbnail');
+            
+            const showForm = (type, data = null) => {
+                const isEntidade = type === 'entidade';
+                const section = document.getElementById(`${type}-creation-section`);
+                const template = document.getElementById(`${type}-form-template`);
+                section.innerHTML = template.innerHTML;
+                const camelCaseType = type.replace(/-([a-z])/g, g => g[1].toUpperCase());
+                
+                if (data) {
+                    document.getElementById(`${camelCaseType}Id`).value = data.id;
+                    document.getElementById(`${camelCaseType}Nome`).value = data.nome;
+                    document.getElementById(isEntidade ? 'entidadeReligiao' : 'itemMagicoFuncao').value = isEntidade ? data.religiao : data.funcao;
+                    document.getElementById(isEntidade ? 'entidadeFuncao' : 'itemMagicoDescricao').value = isEntidade ? data.funcao : data.descricao;
+                    if(isEntidade) document.getElementById('entidadeDescricao').value = data.descricao;
+                    document.getElementById(`${type}-form-title`).textContent = `Editando ${isEntidade ? 'Entidade' : 'Item'}`;
+                    document.getElementById(`${camelCaseType}SubmitButton`).textContent = 'Salvar Alterações';
+                }
+                section.classList.remove('hidden');
+            };
+
+            switch (action) {
+                case 'add-entidade': showForm('entidade'); break;
+                case 'add-item-magico': showForm('item-magico'); break;
+                case 'close-form': actionTarget.closest('.overlay-section').classList.add('hidden'); break;
+                case 'parse-text-modal': openTextParser(actionTarget.dataset.type); break;
+                case 'submit-text-parser': 
+                    parseAndFillForm(actionTarget.closest('.overlay-section').dataset.type);
+                    break;
+                case 'view': {
+                    const { id, type } = card.dataset;
+                    const container = document.getElementById(`${type}-sheet-container`);
+                    const data = await getData(type === 'entidade' ? 'entidades' : 'itensMagicos', id);
+                    const { html, blobUrl } = renderCardSheet(data, true, type);
+                    container.innerHTML = html;
+                    container.dataset.blobUrl = blobUrl;
+                    container.classList.remove('hidden');
+                    break;
+                }
+                case 'close-sheet': {
+                    const container = actionTarget.closest('.overlay-section');
+                    if (container.dataset.blobUrl) URL.revokeObjectURL(container.dataset.blobUrl);
+                    container.classList.add('hidden');
+                    break;
+                }
+                case 'edit': {
+                    const { id, type } = card.dataset;
+                    const data = await getData(type === 'entidade' ? 'entidades' : 'itensMagicos', id);
+                    showForm(type, data);
+                    break;
+                }
+                case 'remove': {
+                    const { id, type } = card.dataset;
+                    if (confirm(`Tem certeza que deseja excluir este item?`)) {
+                        await removeData(type === 'entidade' ? 'entidades' : 'itensMagicos', id);
+                        renderContent(currentView);
+                    }
+                    break;
+                }
+                case 'download': {
+                    const { id, type } = card.dataset;
+                    downloadCard(id, type);
+                    break;
+                }
+            }
+        });
+
+        const handleFormSubmit = async (e, type) => {
+            e.preventDefault();
+            const isEntidade = type === 'entidade';
+            const storeName = isEntidade ? 'entidades' : 'itensMagicos';
+            const camelCaseType = type.replace(/-([a-z])/g, g => g[1].toUpperCase());
+            const imageFile = document.getElementById(`${camelCaseType}ImageUpload`).files[0];
+            const imageBuffer = await readFileAsArrayBuffer(imageFile);
+            let id = document.getElementById(`${camelCaseType}Id`).value;
+            let existingData = {};
+
+            if(id) existingData = await getData(storeName, id); else id = Date.now().toString();
+
+            const data = {
+                id,
+                nome: document.getElementById(`${camelCaseType}Nome`).value,
+                religiao: isEntidade ? document.getElementById('entidadeReligiao').value : undefined,
+                funcao: document.getElementById(isEntidade ? 'entidadeFuncao' : 'itemMagicoFuncao').value,
+                descricao: document.getElementById(isEntidade ? 'entidadeDescricao' : 'itemMagicoDescricao').value,
+                image: imageBuffer || existingData.image,
+                imageMimeType: imageFile ? imageFile.type : existingData.imageMimeType
+            };
+
+            await saveData(storeName, data);
+            document.getElementById(`${type}-creation-section`).classList.add('hidden');
+            renderContent(currentView);
+        };
+        
+
+        document.addEventListener('submit', e => {
+            if (e.target.id === 'entidadeForm') handleFormSubmit(e, 'entidade');
+            if (e.target.id === 'itemMagicoForm') handleFormSubmit(e, 'item-magico');
+        });
+
+    </script>
+</body>
+</html>
+
