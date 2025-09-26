@@ -36,8 +36,9 @@
             visibility: hidden;
             padding: 1rem;
             width: 100%;
-            height: 100%;
-            position: relative;
+            height: calc(100% - 4rem);
+            position: absolute;
+            top: 0;
         }
 
         /* Seções de Overlay (Formulários, Modais, Visualização) */
@@ -66,13 +67,13 @@
 
         /* Grid de Cards */
         #content-display {
-            height: calc(100% - 4rem); /* Ajusta a altura para dar espaço ao título */
+            height: calc(100%); /* Ajusta a altura para dar espaço ao título */
         }
         #content-display .grid {
             height: 100%;
         }
         .rpg-thumbnail {
-            width: 100%; height: 100%; aspect-ratio: 120 / 160; border-radius: 12px;
+            width: 100%; aspect-ratio: 120 / 160; border-radius: 12px;
             position: relative; background-color: #4a5568;
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
             will-change: transform;
@@ -180,6 +181,7 @@
     <div id="entidade-creation-section" class="overlay-section hidden"></div>
     <div id="item-magico-creation-section" class="overlay-section hidden"></div>
     <div id="text-parser-modal" class="overlay-section hidden"></div>
+    <div id="batch-import-modal" class="overlay-section hidden"></div>
 
     <!-- Template para o formulário de Entidade -->
     <template id="entidade-form-template">
@@ -242,7 +244,15 @@
                 </div>
                 <div>
                     <label for="itemMagicoDescricao" class="block text-sm font-semibold mb-1">Descrição</label>
-                    <textarea id="itemMagicoDescricao" rows="4" placeholder="Descreva o item, seus poderes e história..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"></textarea>
+                    <textarea id="itemMagicoDescricao" rows="3" placeholder="Descreva o item, seus poderes e história..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"></textarea>
+                </div>
+                <div>
+                    <label for="itemMagicoFuncaoQueima" class="block text-sm font-semibold mb-1">Função Queima</label>
+                    <textarea id="itemMagicoFuncaoQueima" rows="3" placeholder="Descrição para uso em incensos..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"></textarea>
+                </div>
+                <div>
+                    <label for="itemMagicoFuncaoBanho" class="block text-sm font-semibold mb-1">Função Banho</label>
+                    <textarea id="itemMagicoFuncaoBanho" rows="3" placeholder="Descrição para uso em banhos..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"></textarea>
                 </div>
                 <div>
                     <label for="itemMagicoImageUpload" class="block text-sm font-semibold mb-1 cursor-pointer">Imagem do Item</label>
@@ -265,6 +275,26 @@
             <p class="text-gray-400 mb-4 text-sm">Cole o texto abaixo. Use o formato "Campo: Valor".</p>
             <textarea id="text-parser-input" rows="10" class="w-full p-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="Exemplo:&#10;Nome: Thor&#10;Religião: Panteão Nórdico&#10;..."></textarea>
             <button id="text-parser-submit" data-action="submit-text-parser" class="w-full mt-4 py-2 px-4 rounded-full font-bold text-white bg-indigo-600 hover:bg-indigo-700">Preencher Formulário</button>
+        </div>
+    </template>
+
+    <!-- Template para o Modal de Importação em Lote -->
+    <template id="batch-import-modal-template">
+        <div class="form-container">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-300">Importação em Lote</h2>
+                <button data-action="close-form" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            </div>
+            <p class="text-gray-400 mb-4 text-sm">
+                Selecione um arquivo <code>.txt</code>. Cada item deve ser separado por uma linha em branco.
+            </p>
+            <div class="mt-4">
+                <label for="batch-file-input" class="w-full text-center cursor-pointer bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg inline-block">
+                    <i class="fas fa-upload mr-2"></i> Selecionar Arquivo
+                </label>
+                <input type="file" id="batch-file-input" class="hidden" accept=".txt">
+                <p id="batch-file-name" class="text-sm text-gray-400 mt-2"></p>
+            </div>
         </div>
     </template>
 
@@ -317,7 +347,7 @@
             const glowColor = isEntidade ? '#818cf8' : '#fbbf24'; // indigo-400 and amber-400
 
             const cardHtml = `
-                <div id="card-to-download" class="sheet-card relative w-full h-full max-h-[90vh] aspect-[3/4] bg-gray-900 text-white flex flex-col" style="--glow-color: ${glowColor}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; max-width: 26rem;">
+                <div id="card-to-download" class="sheet-card relative w-full h-full max-w-md max-h-[90vh] aspect-[3/4] bg-gray-900 text-white flex flex-col" style="--glow-color: ${glowColor}; background-image: url('${imageUrl}'); background-size: cover; background-position: center;">
                     
                     <div class="relative w-full h-full flex flex-col z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
                         ${isModal ? `<button data-action="close-sheet" class="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center z-20"><i class="fas fa-times"></i></button>` : ''}
@@ -327,7 +357,21 @@
                                 <p class="text-sm font-medium text-${colorClass}-300">${isEntidade ? data.religiao : data.funcao}</p>
                                 <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-white">${data.nome}</h2>
                                 <div class="sheet-card-divider"></div>
-                                <p class="text-gray-300 text-xs leading-relaxed max-h-40 md:max-h-48 overflow-y-auto pr-2">${data.descricao}</p>
+                                <div class="space-y-3 max-h-48 overflow-y-auto pr-2">
+                                    <p class="text-gray-300 text-xs leading-relaxed">${data.descricao}</p>
+                                    ${!isEntidade && data.funcaoQueima ? `
+                                        <div class="pt-2">
+                                            <h3 class="text-sm font-semibold text-amber-300 flex items-center gap-2"><i class="fas fa-fire fa-fw"></i> Função Queima</h3>
+                                            <p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6">${data.funcaoQueima}</p>
+                                        </div>
+                                    ` : ''}
+                                    ${!isEntidade && data.funcaoBanho ? `
+                                        <div class="pt-2">
+                                            <h3 class="text-sm font-semibold text-amber-300 flex items-center gap-2"><i class="fas fa-bath fa-fw"></i> Função Banho</h3>
+                                            <p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6">${data.funcaoBanho}</p>
+                                        </div>
+                                    ` : ''}
+                                 </div>
                             </div>
                         </div>
                     </div>
@@ -352,7 +396,17 @@
             const title = isEntidades ? 'Adicionar Entidade' : 'Adicionar Item';
             const data = await getData(storeName);
 
-            grid.innerHTML = `<div class="relative w-full h-full"><button class="add-card-button absolute inset-0" data-action="${action}"><i class="fas fa-plus text-2xl mb-2"></i><span class="text-sm font-semibold">${title}</span></button></div>`;
+            const addCardButtonHtml = `
+                
+                    <button class="add-card-button w-full flex-grow" data-action="${action}">
+                        <i class="fas fa-plus text-2xl mb-2"></i>
+                        <span class="text-sm font-semibold">${title}</span>
+                    </button>
+                    <button class="add-card-button w-full text-xs py-2" data-action="batch-import" data-type="${isEntidades ? 'entidade' : 'item-magico'}">
+                        <i class="fas fa-file-import mr-1"></i>
+                        <span>Importar em Lote</span>
+                    </button>`;
+            grid.innerHTML = addCardButtonHtml;
             
             data.forEach(item => {
                 const itemDiv = document.createElement('div');
@@ -364,7 +418,7 @@
                 itemDiv.style.backgroundImage = `url('${imageUrl}')`;
 
                 itemDiv.innerHTML = `
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent cursor-pointer" data-action="view"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent cursor-pointer" data-action="view" style="border-radius: 5px;"></div>
                     <div class="absolute bottom-0 p-3 text-white w-full cursor-pointer" data-action="view">
                         <h3 class="font-bold text-sm truncate">${item.nome}</h3>
                     </div>
@@ -410,6 +464,75 @@
                 URL.revokeObjectURL(blobUrl);
             });
         };
+
+        const openBatchImportModal = (type) => {
+            const modal = document.getElementById('batch-import-modal');
+            const template = document.getElementById('batch-import-modal-template');
+            modal.innerHTML = template.innerHTML;
+            modal.classList.remove('hidden');
+
+            const fileInput = modal.querySelector('#batch-file-input');
+            const fileNameDisplay = modal.querySelector('#batch-file-name');
+
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    fileNameDisplay.textContent = file.name;
+                    handleFileUpload(file, type);
+                }
+            });
+        };
+        
+        const handleFileUpload = (file, type) => {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const content = e.target.result;
+                await processBatchImport(content, type);
+                document.getElementById('batch-import-modal').classList.add('hidden');
+                alert(`${type === 'entidade' ? 'Entidades' : 'Itens'} importados com sucesso!`);
+                renderContent(currentView);
+            };
+            reader.readAsText(file);
+        };
+
+        const processBatchImport = async (text, type) => {
+            const entries = text.split(/\n\s*\n/).filter(entry => entry.trim() !== '');
+            const storeName = type === 'entidade' ? 'entidades' : 'itensMagicos';
+            const fieldMap = type === 'entidade' ? {
+                "nome": "nome", "religião": "religiao", "panteão": "religiao",
+                "função": "funcao", "descrição": "descricao"
+            } : {
+                "nome": "nome", "função": "funcao", "descrição": "descricao",
+                "funcao queima": "funcaoQueima", "função queima": "funcaoQueima",
+                "funcao banho": "funcaoBanho", "função banho": "funcaoBanho"
+            };
+
+            const transaction = db.transaction(storeName, 'readwrite');
+            const store = transaction.objectStore(storeName);
+
+            entries.forEach(entry => {
+                const lines = entry.trim().split('\n');
+                const data = { id: crypto.randomUUID() };
+                lines.forEach(line => {
+                    const parts = line.split(/:(.*)/s);
+                    if (parts.length > 1) {
+                        const key = parts[0].trim().toLowerCase();
+                        const value = parts[1].trim();
+                        if (fieldMap[key]) {
+                            data[fieldMap[key]] = value;
+                        }
+                    }
+                });
+                if (data.nome) { 
+                    store.put(data);
+                }
+            });
+
+            return new Promise((resolve, reject) => {
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            });
+        };
         
         const openTextParser = (type) => {
             const modal = document.getElementById('text-parser-modal');
@@ -424,14 +547,18 @@
             const camelCaseType = type.replace(/-([a-z])/g, g => g[1].toUpperCase());
             const fieldMap = type === 'entidade' ? {
                 "nome": `${camelCaseType}Nome`,
-                "religião": `${camelCaseType}Religiao`,
-                "panteão": `${camelCaseType}Religiao`,
-                "função": `${camelCaseType}Funcao`,
-                "descrição": `${camelCaseType}Descricao`
+                "religião": `entidadeReligiao`,
+                "panteão": `entidadeReligiao`,
+                "função": `entidadeFuncao`,
+                "descrição": `entidadeDescricao`
             } : {
                 "nome": `${camelCaseType}Nome`,
-                "função": `${camelCaseType}Funcao`,
-                "descrição": `${camelCaseType}Descricao`
+                "função": `itemMagicoFuncao`,
+                "descrição": `itemMagicoDescricao`,
+                "funcao queima": "itemMagicoFuncaoQueima",
+                "função queima": "itemMagicoFuncaoQueima",
+                "funcao banho": "itemMagicoFuncaoBanho",
+                "função banho": "itemMagicoFuncaoBanho"
             };
 
             const lines = text.split('\n');
@@ -440,8 +567,9 @@
                 if (parts.length > 1) {
                     const key = parts[0].trim().toLowerCase();
                     const value = parts[1].trim();
-                    if (fieldMap[key] && document.getElementById(fieldMap[key])) {
-                        document.getElementById(fieldMap[key]).value = value;
+                    const elementId = fieldMap[key];
+                    if (elementId && document.getElementById(elementId)) {
+                        document.getElementById(elementId).value = value;
                     }
                 }
             });
@@ -511,9 +639,16 @@
                 if (data) {
                     document.getElementById(`${camelCaseType}Id`).value = data.id;
                     document.getElementById(`${camelCaseType}Nome`).value = data.nome;
-                    document.getElementById(isEntidade ? 'entidadeReligiao' : 'itemMagicoFuncao').value = isEntidade ? data.religiao : data.funcao;
-                    document.getElementById(isEntidade ? 'entidadeFuncao' : 'itemMagicoDescricao').value = isEntidade ? data.funcao : data.descricao;
-                    if(isEntidade) document.getElementById('entidadeDescricao').value = data.descricao;
+                    if(isEntidade) {
+                        document.getElementById('entidadeReligiao').value = data.religiao || '';
+                        document.getElementById('entidadeFuncao').value = data.funcao || '';
+                        document.getElementById('entidadeDescricao').value = data.descricao || '';
+                    } else {
+                        document.getElementById('itemMagicoFuncao').value = data.funcao || '';
+                        document.getElementById('itemMagicoDescricao').value = data.descricao || '';
+                        document.getElementById('itemMagicoFuncaoQueima').value = data.funcaoQueima || '';
+                        document.getElementById('itemMagicoFuncaoBanho').value = data.funcaoBanho || '';
+                    }
                     document.getElementById(`${type}-form-title`).textContent = `Editando ${isEntidade ? 'Entidade' : 'Item'}`;
                     document.getElementById(`${camelCaseType}SubmitButton`).textContent = 'Salvar Alterações';
                 }
@@ -523,6 +658,7 @@
             switch (action) {
                 case 'add-entidade': showForm('entidade'); break;
                 case 'add-item-magico': showForm('item-magico'); break;
+                case 'batch-import': openBatchImportModal(actionTarget.dataset.type); break;
                 case 'close-form': actionTarget.closest('.overlay-section').classList.add('hidden'); break;
                 case 'parse-text-modal': openTextParser(actionTarget.dataset.type); break;
                 case 'submit-text-parser': 
@@ -568,22 +704,28 @@
 
         const handleFormSubmit = async (e, type) => {
             e.preventDefault();
+            const form = e.target;
             const isEntidade = type === 'entidade';
             const storeName = isEntidade ? 'entidades' : 'itensMagicos';
             const camelCaseType = type.replace(/-([a-z])/g, g => g[1].toUpperCase());
-            const imageFile = document.getElementById(`${camelCaseType}ImageUpload`).files[0];
+            
+            const imageInput = form.querySelector(`#${camelCaseType}ImageUpload`);
+            const imageFile = imageInput ? imageInput.files[0] : null;
+            
             const imageBuffer = await readFileAsArrayBuffer(imageFile);
-            let id = document.getElementById(`${camelCaseType}Id`).value;
+            let id = form.querySelector(`#${camelCaseType}Id`).value;
             let existingData = {};
 
-            if(id) existingData = await getData(storeName, id); else id = Date.now().toString();
+            if(id) existingData = await getData(storeName, id); else id = crypto.randomUUID();
 
             const data = {
                 id,
-                nome: document.getElementById(`${camelCaseType}Nome`).value,
-                religiao: isEntidade ? document.getElementById('entidadeReligiao').value : undefined,
-                funcao: document.getElementById(isEntidade ? 'entidadeFuncao' : 'itemMagicoFuncao').value,
-                descricao: document.getElementById(isEntidade ? 'entidadeDescricao' : 'itemMagicoDescricao').value,
+                nome: form.querySelector(`#${camelCaseType}Nome`).value,
+                religiao: isEntidade ? form.querySelector('#entidadeReligiao').value : undefined,
+                funcao: form.querySelector(isEntidade ? '#entidadeFuncao' : '#itemMagicoFuncao').value,
+                descricao: form.querySelector(isEntidade ? '#entidadeDescricao' : '#itemMagicoDescricao').value,
+                funcaoQueima: !isEntidade ? form.querySelector('#itemMagicoFuncaoQueima').value : undefined,
+                funcaoBanho: !isEntidade ? form.querySelector('#itemMagicoFuncaoBanho').value : undefined,
                 image: imageBuffer || existingData.image,
                 imageMimeType: imageFile ? imageFile.type : existingData.imageMimeType
             };
@@ -593,7 +735,6 @@
             renderContent(currentView);
         };
         
-
         document.addEventListener('submit', e => {
             if (e.target.id === 'entidadeForm') handleFormSubmit(e, 'entidade');
             if (e.target.id === 'itemMagicoForm') handleFormSubmit(e, 'item-magico');
