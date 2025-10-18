@@ -323,7 +323,7 @@ async function openGrimoireViewer(grimoireData) {
     
     container.innerHTML = `
         <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200]">
-            <div id="grimoire-modal-content" class="bg-gray-900 text-white shadow-2xl w-full h-[100vh] flex flex-col relative overflow-scroll">
+            <div id="grimoire-modal-content" class="bg-gray-900 text-white shadow-2xl w-full flex flex-col relative overflow-scroll" style="height: calc(100vh - 0.6rem)">
                 <div class="flex justify-between items-center p-4 border-b border-gray-700 flex-shrink-0">
                     <h2 class="text-2xl font-bold text-yellow-300 truncate">${currentGrimoireData.title} - ${currentGrimoireData.vol || ''}</h2>
                     <button id="close-grimoire-btn" class="text-gray-400 hover:text-white text-2xl w-8 h-8 rounded-full hover:bg-gray-700">&times;</button>
@@ -636,3 +636,4 @@ function clearEntryForm(container) {
     
     entryImageFile = null;
 }
+
