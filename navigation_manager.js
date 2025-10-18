@@ -636,7 +636,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (mainContainer) mainContainer.style.overflowY = 'auto';
             contentDisplay.style.overflowY = 'scroll';
         }
-
+        invalidateCache(target);
         if (target === 'personagem') await renderCharacterList();
         else if (target === 'magias') await renderSpellList('magias');
         else if (target === 'habilidades') await renderSpellList('habilidades');
@@ -1058,3 +1058,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
+
