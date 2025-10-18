@@ -102,9 +102,12 @@
     </aside>
 
      <!-- Sliding Actions Sidebar for Mobile -->
-    <div id="actions-sidebar" class="fixed bottom-32 -translate-y-1/2 z-50 flex items-center md:hidden">
-        <div id="sidebar-buttons" class="flex flex-col gap-3 p-2 rounded-r-lg shadow-lg">
-           <button id="export-db-btn-mobile" class="sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Exportar Banco de Dados">
+    <div id="actions-sidebar" class="fixed top-1/2 -translate-y-1/2 z-50 flex items-center md:hidden">
+        <button id="sidebar-toggle" class="w-3 h-16 rounded-l-lg flex items-center justify-center shadow-lg">
+            <i class="fas fa-chevron-left"></i>
+        </button>   
+        <div id="sidebar-buttons" class="flex flex-col gap-3 p-2 rounded-l-lg shadow-lg">
+            <button id="export-db-btn-mobile" class="sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Exportar Banco de Dados">
                 <i class="fas fa-file-download"></i>
             </button>
             <button id="import-db-btn-mobile" class="sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Importar Banco de Dados">
@@ -114,9 +117,7 @@
                 <i class="fas fa-file-image"></i>
             </button>
         </div>
-        <button id="sidebar-toggle" class="w-3 h-16 rounded-r-lg flex items-center justify-center shadow-lg">
-            <i class="fas fa-chevron-left"></i>
-        </button>        
+             
     </div>
 
      <!-- Sliding Actions Sidebar for Mobile -->
@@ -125,11 +126,16 @@
             <button id="dice-roller-fab" class="dice-roller-fab sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Exportar Banco de Dados">
                <i class="fas fa-dice-d20"></i>
             </button>
-            <!-- <button id="theme-switcher-mobile" class="sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Alterar Tema">
-                <i class="fas fa-moon"></i>
-            </button> -->            
             <button id="aspect-ratio-btn-mobile" class="sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Ajustar Tamanho dos Cards">
                 <i class="fas fa-expand-alt"></i>
+            </button>           
+
+            <!-- <button id="theme-switcher-mobile" class="sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Alterar Tema">
+                <i class="fas fa-moon"></i>
+            </button> -->  
+            <hr>
+            <button  class=" sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Exportar Banco de Dados"  data-target="grimorio" title="Grimório">
+               <i class="fas fa-book-open"></i>
             </button>
             <button class="sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" data-target="categorias" title="Categorias">
                 <i class="fas fa-tags"></i>
@@ -671,10 +677,7 @@
         </button>
         <button class="nav-button px-4 py-2 text-sm font-semibold rounded-full focus:outline-none flex items-center gap-2" data-target="itens" title="Itens">
             <i class="fas fa-box"></i>
-        </button>
-         <button class="nav-button px-4 py-2 text-sm font-semibold rounded-full focus:outline-none flex items-center gap-2" data-target="grimorio" title="Grimório">
-            <i class="fas fa-book-open"></i>
-        </button>      
+        </button>               
     </nav>
 
     <script src="./splash_screen.js"></script>

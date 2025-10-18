@@ -27,6 +27,7 @@ function bufferToBlob(buffer, mimeType) {
  */
 export async function renderGrimoireScreen() {
     const contentDisplay = document.getElementById('content-display');
+    contentDisplay.innerHTML= '';
     contentDisplay.innerHTML = `
         <div class="p-6 w-full max-w-6xl mx-auto">
             <h2 class="text-3xl font-bold text-yellow-300 mb-6 border-b-2 border-gray-700 pb-2">Grimórios e Diários</h2>
@@ -125,8 +126,6 @@ export async function renderGrimoireScreen() {
             showCustomAlert('Por favor, preencha todos os campos.');
         }
     });
-
-    attachGrimoireEventListeners();
 }
 
 /**
@@ -323,8 +322,8 @@ async function openGrimoireViewer(grimoireData) {
     container.id = 'grimoire-editor-container';
     
     container.innerHTML = `
-        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 md:p-4 z-[200]">
-            <div id="grimoire-modal-content" class="bg-gray-900 border-2 border-yellow-800/50 text-white rounded-2xl shadow-2xl w-full max-w-4xl h-[95vh] flex flex-col relative">
+        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200]">
+            <div id="grimoire-modal-content" class="bg-gray-900 text-white shadow-2xl w-full h-[100vh] flex flex-col relative overflow-scroll">
                 <div class="flex justify-between items-center p-4 border-b border-gray-700 flex-shrink-0">
                     <h2 class="text-2xl font-bold text-yellow-300 truncate">${currentGrimoireData.title} - ${currentGrimoireData.vol || ''}</h2>
                     <button id="close-grimoire-btn" class="text-gray-400 hover:text-white text-2xl w-8 h-8 rounded-full hover:bg-gray-700">&times;</button>
@@ -332,7 +331,7 @@ async function openGrimoireViewer(grimoireData) {
                 
                 <div class="flex-grow flex flex-col md:flex-row p-2 md:p-4 gap-4 overflow-hidden">
                     <div id="page-viewer" class="w-full h-full flex flex-col bg-black/20 rounded-lg p-4 overflow-y-auto"></div>
-                    <button id="toggle-editor-btn" class="md:hidden absolute bottom-4 right-4 z-20 w-12 h-12 bg-yellow-600 rounded-full flex items-center justify-center text-white shadow-lg">
+                    <button id="toggle-editor-btn" class="md:hidden absolute bottom-4 right-4 z-20 w-12 h-12 bg-yellow-600 rounded-full flex items-center justify-center text-white shadow-lg" style="z-index: 0;">
                         <i class="fas fa-pen"></i>
                     </button>
                     <div id="editor-panel" class="absolute md:relative z-10 inset-0 md:inset-auto bg-gray-900 md:bg-transparent transform translate-x-full md:transform-none transition-transform duration-300 ease-in-out md:w-80 flex-shrink-0 flex flex-col gap-4 p-4 md:p-0">
@@ -636,20 +635,4 @@ function clearEntryForm(container) {
     }
     
     entryImageFile = null;
-}
-
-function attachGrimoireEventListeners() {
-    document.querySelectorAll('.edit-grimoire-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-            const id = e.currentTarget.dataset.id;
-            editGrimoire(id);
-        });
-    });
-
-    document.querySelectorAll('.delete-grimoire-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-            const id = e.currentTarget.dataset.id;
-            deleteGrimoire(id);
-        });
-    });
 }

@@ -5,7 +5,7 @@ import { saveAttackCard, editAttack, removeAttack, exportAttack, importAttack } 
 import { renderCategoryScreen, populateCategorySelect } from './category_manager.js';
 import { renderGrimoireScreen } from './grimoire_manager.js';
 import { renderFullAttackSheet } from './attack_renderer.js';
-import { openDatabase, removeData, getData, saveData, exportDatabase, importDatabase, exportImagesAsPng } from './local_db.js';
+import { openDatabase, removeData, getData, saveData, exportDatabase, importDatabase, exportImagesAsPng, showProgressModal, hideProgressModal, updateProgress } from './local_db.js';
 import { renderFullCharacterSheet } from './card-renderer.js';
 import { renderFullSpellSheet } from './magic_renderer.js';
 import { renderFullItemSheet } from './item_renderer.js';
@@ -617,8 +617,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         contentDisplay.classList.remove('justify-center');
         contentDisplay.removeAttribute('style'); // Limpa estilos para corrigir o bug do background
 
-        // Se a view estiver em cache, não for forçado E NÃO for "em jogo", use o cache.
-        if (!force && viewCache[target] && target !== 'personagem-em-jogo') {
+        // Telas complexas com múltiplos event listeners e estado não devem usar cache de HTML.
+        const complexScreens = ['personagem-em-jogo', 'grimorio'];
+
+        // Se a view estiver em cache e não for uma tela complexa, use o cache.
+        if (!force && viewCache[target] && !complexScreens.includes(target)) {
             contentDisplay.innerHTML = viewCache[target];
             applyThumbnailScaling(contentDisplay);
             return;
@@ -646,8 +649,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         else if (target === 'grimorio') await renderGrimoireScreen();
         else if (target === 'personagem-em-jogo') await renderCharacterInGame();
 
-        // Não salva a tela "em-jogo" no cache por ser muito dinâmica
-        if (target && target !== 'personagem-em-jogo') {
+        // Não salva telas complexas no cache por serem muito dinâmicas
+        if (target && !complexScreens.includes(target)) {
             viewCache[target] = contentDisplay.innerHTML;
         }
     };
@@ -725,6 +728,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const target = event.currentTarget.dataset.target;
             if (!target) return;
 
+            // Close mobile sidebars on navigation
+            const sidebar = document.getElementById('actions-sidebar');
+            const sidebar1 = document.getElementById('actions-sidebar-1');
+            if (sidebar) sidebar.classList.remove('active');
+            if (sidebar1) sidebar1.classList.remove('active');
+
             navButtons.forEach(btn => btn.classList.remove('active'));
             
             document.querySelectorAll(`[data-target="${target}"]`).forEach(b => b.classList.add('active'));
@@ -733,6 +742,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
     
+    // The listener above handles closing for navigation buttons ([data-target]).
+    // This adds the same closing behavior to the other action buttons in the sidebars.
+    const actionButtons = document.querySelectorAll('#actions-sidebar button:not([data-target]), #actions-sidebar-1 button:not([data-target])');
+    
+    actionButtons.forEach(button => {
+        // Exclude toggle buttons which have their own logic in sidebar_manager.js
+        if (button.id !== 'sidebar-toggle' && button.id !== 'sidebar-toggle-1') {
+            button.addEventListener('click', () => {
+                const sidebar = document.getElementById('actions-sidebar');
+                const sidebar1 = document.getElementById('actions-sidebar-1');
+                if (sidebar) sidebar.classList.remove('active');
+                if (sidebar1) sidebar1.classList.remove('active');
+            });
+        }
+    });
+
     document.addEventListener('click', (e) => {
         const action = e.target.closest('[data-action]')?.dataset.action;
         if (!action) return;
@@ -839,12 +864,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderContent('personagem-em-jogo');
     
     const exportHandler = async () => {
+        showProgressModal("Exportando Banco de Dados...");
         try {
-            await exportDatabase();
+            await exportDatabase(updateProgress);
             showCustomAlert("Banco de dados exportado com sucesso!");
         } catch (error) {
             console.error("Erro ao exportar banco de dados:", error);
             showCustomAlert("Ocorreu um erro ao exportar.");
+        } finally {
+            hideProgressModal();
         }
     };
 
@@ -853,11 +881,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const exportImagesHandler = async () => {
+        showProgressModal("Exportando Imagens...");
         try {
-            await exportImagesAsPng();
+            await exportImagesAsPng(updateProgress);
         } catch (error) {
             console.error("Erro ao exportar imagens:", error);
             showCustomAlert("Ocorreu um erro ao exportar as imagens.");
+        } finally {
+            hideProgressModal();
         }
     };
 
@@ -873,8 +904,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const file = e.target.files[0];
         if (file) {
             if (await showCustomConfirm('Isso substituirá TODOS os dados atuais. Deseja continuar?')) {
+                showProgressModal("Importando Banco de Dados...");
                 try {
-                    await importDatabase(file);
+                    await importDatabase(file, updateProgress);
                     showCustomAlert("Banco de dados importado com sucesso!");
                     Object.keys(viewCache).forEach(key => delete viewCache[key]); // Limpa todo o cache
                     const activeNav = document.querySelector('.nav-button.active, .desktop-nav-button.active')?.dataset.target || 'personagem-em-jogo';
@@ -883,6 +915,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.error("Erro ao importar banco de dados:", error);
                     showCustomAlert("Erro ao importar. Verifique se o arquivo é válido.");
                 } finally {
+                    hideProgressModal();
                     importDbInput.value = '';
                 }
             }
@@ -1058,4 +1091,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
-

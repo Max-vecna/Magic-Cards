@@ -128,13 +128,21 @@ body.dark .splash-screen .text-white { color: var(--splash-text) !important; }
 }
 
 /* Action Sidebar (Mobile Sliding) */
-#actions-sidebar, #actions-sidebar-1 {
+#actions-sidebar-1 {
     left: -48px; /* Largura do painel de botões (p-2 + w-8 = 8+32+8=48px) */
     transition: left 0.3s ease-in-out;
 }
 
-#actions-sidebar.active, #actions-sidebar-1.active {
+#actions-sidebar {
+    right: -48px; /* Largura do painel de botões (p-2 + w-8 = 8+32+8=48px) */
+    transition: right 0.3s ease-in-out;
+}
+
+#actions-sidebar-1.active {
     left: 0;
+}
+#actions-sidebar.active {
+    right: 0;
 }
 
 #sidebar-buttons {
@@ -161,8 +169,15 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
     transition: transform 0.3s ease-in-out;
 }
 
-#actions-sidebar.active #sidebar-toggle > i, #actions-sidebar-1.active #sidebar-toggle-1 > i {
+#actions-sidebar-1.active #sidebar-toggle-1 > i {
     transform: rotate(180deg);
+}
+
+#actions-sidebar #sidebar-toggle > i {
+    transform: rotate(180deg);
+}
+#actions-sidebar.active #sidebar-toggle > i {
+    transform: rotate(0);
 }
 
 
