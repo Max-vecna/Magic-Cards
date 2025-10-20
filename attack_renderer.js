@@ -8,6 +8,13 @@ export async function renderFullAttackSheet(attackData, isModal) {
     const sheetContainer = document.getElementById('attack-sheet-container');
     if (!sheetContainer) return '';
 
+    if(isModal)
+    {  
+        const index = document.getElementsByClassName('visible').length;
+        console.log('Z-Index for character sheet modal/in-play:', index);
+        sheetContainer.style.zIndex = 1000 + index;
+    }
+
     const aspectRatio = isModal?  getAspectRatio() : 10/16;
 
     const windowWidth = window.innerWidth;

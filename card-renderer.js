@@ -157,7 +157,7 @@ async function populateInventory(container, characterData, uniqueId) {
          attacksHtml = `<div><h4 class="font-bold text-red-400 border-b border-red-400/30 pb-1 mb-2 px-2">Ataques</h4><p class="text-xs text-gray-400 italic px-2">Nenhum</p></div>`;
     }
 
-    scrollArea.innerHTML = inventoryHtml + magicsHtml + skillsHtml + attacksHtml;
+    scrollArea.innerHTML =  magicsHtml + skillsHtml + attacksHtml + inventoryHtml;
 
     scrollArea.addEventListener('click', async (e) => {
         const target = e.target.closest('[data-id][data-type]');
@@ -289,6 +289,10 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     // If it's a modal or in-play view, we need to make the container visible first
     // to correctly calculate dimensions and apply animations.
     if (isModal || isInPlay) {
+
+        const index = document.getElementsByClassName('visible').length;
+        console.log('Z-Index for character sheet modal/in-play:', index);
+        sheetContainer.style.zIndex = 1000 + index;
         sheetContainer.classList.remove('hidden');
     }
 
@@ -481,12 +485,12 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                 </div>
             </div>
 
-            <div class="absolute bottom-0 w-full p-4">
-                <!-- RELATIONSHIPS_BAR -->
+            <div class="absolute bottom-0 w-full p-4">                
                 <div class="pb-4 scrollable-content text-sm text-left" style="display: flex; flex-direction: row; overflow-y: scroll;gap: 12px; scroll-snap-type: x mandatory;">
                     <!-- Página 1: Atributos -->
                     <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end;padding: 10px;">
-                        <div class="grid grid-cols-6 gap-x-4 gap-y-1 text-xs my-2 mb-4">
+                    <!-- RELATIONSHIPS_BAR -->    
+                    <div class="grid grid-cols-6 gap-x-4 gap-y-1 text-xs my-2 mb-4">
                             <div class="text-center font-bold" style="color: rgb(0 247 85);">LV<br>${characterData.level || 0}</div>
                             ${combatStatsHtml}
                             <div class="text-center">CD<br>${cdValue}</div>                            
@@ -510,13 +514,13 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                     </div>
                     <!-- Página 2: Perícias -->
                     <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end;">
-                        <div class="pericias-scroll-area flex flex-col gap-2 px-2" style="overflow-y: auto; max-height: 170px;">
+                        <div class="pericias-scroll-area flex flex-col gap-2 px-2" style="overflow-y: auto; max-height: 250px;">
                             ${periciasHtml}
                         </div>
                     </div>
                     <!-- Página 3: Inventário & Magias -->
                     <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: flex-end;">
-                        <div id="inventory-magic-scroll-area-${uniqueId}" class="space-y-2" style="overflow-y: auto; max-height: 170px;">
+                        <div id="inventory-magic-scroll-area-${uniqueId}" class="space-y-2" style="overflow-y: auto; max-height: 250px;">
                         </div>
                     </div>
                 </div>
@@ -643,4 +647,3 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     }
     return finalHtml;
 }
-

@@ -10,6 +10,13 @@ export async function renderFullItemSheet(itemData, isModal) {
 
     const aspectRatio = isModal?  getAspectRatio() : 10/16;
 
+    if(isModal)
+    {  
+        const index = document.getElementsByClassName('visible').length;
+        console.log('Z-Index for character sheet modal/in-play:', index);
+        sheetContainer.style.zIndex = 1000 + index;
+    }
+
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
