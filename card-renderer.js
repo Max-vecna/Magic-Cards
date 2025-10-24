@@ -822,7 +822,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
             </div>
             <!-- Vida Display -->
             <div class="absolute top-6 right-4 p-2 rounded-full text-center cursor-pointer" data-action="edit-stat" data-stat-type="vida" data-stat-max="${permanentMaxVida}">
-                <i class="fas fa-heart text-red-500 text-5xl fa-beat"></i>
+                <i class="fas fa-heart text-red-500 text-4xl fa-beat"></i>
                 <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none">
                     <span data-stat-current="vida">
                         ${characterData.attributes.vidaAtual || 0}
@@ -841,11 +841,11 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
              <!-- Mana Display -->
             <div class="absolute top-6 left-4 p-2 rounded-full text-center cursor-pointer" style="display: flex; justify-content: center; flex-direction: column;">
                 <div class="icon-container mana-icon-container" data-action="edit-stat" data-stat-type="mana" data-stat-max="${permanentMaxMana}">
-                    <i class="fas fa-fire text-blue-500 text-5xl"></i>
+                    <i class="fa-brands fa-gripfire text-blue-500 text-5xl"></i>
                     <div class="absolute left-0 right-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none" style="top: 20px;">
-                        <span data-stat-current="mana">
+                        <span data-stat-current="mana" class="text-green-400">
                             ${characterData.attributes.manaAtual || 0}
-                            ${(totalTemporaryBonuses.mana || 0) > 0 ? `<span class="text-blue-400 font-semibold">+ ${totalTemporaryBonuses.mana}</span>` : ''}
+                            ${(totalTemporaryBonuses.mana || 0) > 0 ? `<span class="text-red-400 font-semibold">+ ${totalTemporaryBonuses.mana}</span>` : ''}
                         </span>
                         <hr style="width: 15px;">
                         <!-- *** MODIFICAÇÃO: Atributo de dados adicionado *** -->
