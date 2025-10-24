@@ -843,7 +843,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                 <div class="icon-container mana-icon-container" data-action="edit-stat" data-stat-type="mana" data-stat-max="${permanentMaxMana}">
                     <i class="fa-brands fa-gripfire text-blue-500 text-5xl"></i>
                     <div class="absolute left-0 right-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none" style="top: 20px;">
-                        <span data-stat-current="mana" class="text-green-400">
+                        <span data-stat-current="mana">
                             ${characterData.attributes.manaAtual || 0}
                             ${(totalTemporaryBonuses.mana || 0) > 0 ? `<span class="text-red-400 font-semibold">+ ${totalTemporaryBonuses.mana}</span>` : ''}
                         </span>
@@ -1056,3 +1056,4 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     }
     return finalHtml;
 }
+
