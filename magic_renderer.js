@@ -1,5 +1,4 @@
 import { getAspectRatio } from './settings_manager.js';
-import { isCombatActive } from './navigation_manager.js';
 
 function bufferToBlob(buffer, mimeType) {
     return new Blob([buffer], { type: mimeType });
@@ -8,13 +7,6 @@ function bufferToBlob(buffer, mimeType) {
 export async function renderFullSpellSheet(spellData, isModal) {
     const sheetContainer = document.getElementById('spell-sheet-container');
     if (!sheetContainer) return;
-
-    if(isModal)
-    {  
-        const index = document.getElementsByClassName('visible').length;
-        console.log('Z-Index for character sheet modal/in-play:', index);
-        sheetContainer.style.zIndex = 100000000 + index;
-    }
 
     const aspectRatio = isModal?  getAspectRatio() : 10/16;
 
@@ -44,11 +36,13 @@ export async function renderFullSpellSheet(spellData, isModal) {
     sheetContainer.style.backgroundSize = 'cover';
     sheetContainer.style.backgroundPosition = 'center';
 
+    // Usa a cor salva, com um fallback para cards antigos
     const predominantColor = spellData.predominantColor || { color30: 'rgba(13, 148, 136, 0.3)', color100: 'rgb(13, 148, 136)' };
 
     const origin = isModal ?  "" : "transform-origin: top left";
     const transformProp = isModal ? 'transform: scale(0.9);' : '';
     
+    // Processar aumentos
     let aumentosHtml = '';
     if (spellData.aumentos && spellData.aumentos.length > 0) {
         const aumentosFixos = spellData.aumentos.filter(a => a.tipo === 'fixo');
@@ -73,6 +67,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
 
     const uniqueId = `spell-${spellData.id}-${Date.now()}`;
     
+    // Verifica se há dados para a barra de estatísticas
     const statsFields = ['execution', 'range', 'target', 'duration', 'resistencia'];
     const hasStatsInfo = statsFields.some(field => spellData[field]);
     let statsHtml = '';
@@ -103,6 +98,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
         `;
     }
 
+    // Verifica se há dados para a barra do topo (círculo/mana)
     const hasTopBarInfo = (spellData.circle && spellData.circle > 0) || (spellData.manaCost && spellData.manaCost > 0);
     let topBarHtml = '';
     if (hasTopBarInfo) {
@@ -112,24 +108,15 @@ export async function renderFullSpellSheet(spellData, isModal) {
         topBarHtml = `<p class="text-sm font-medium">${circleText}${separator}${manaText}</p>`;
     }
 
-    const hasTemporaryAumentos = spellData.aumentos && spellData.aumentos.some(a => a.tipo === 'temporario');
-    const hasManaCost = spellData.manaCost && spellData.manaCost > 0;
-    const useBuffButtonHtml = isCombatActive() && (hasTemporaryAumentos || hasManaCost) ? `
-        <button id="use-buff-btn-${uniqueId}" class="absolute top-0 right-0 -translate-x-1/2 -translate-y-1/2 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-indigo-700 transition-colors z-20" style='background-color: ${predominantColor.color100}'>
-            Usar
-        </button>
-    ` : '';
 
     const sheetHtml = `
         <button id="close-spell-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-20 thumb-btn" style="display:${isModal? "block": "none"};"><i class="fa-solid fa-xmark"></i></button>
         <div id="spell-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white" style="${origin}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; box-shadow: 0 0 20px ${predominantColor.color100}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto;">        
-            
             <div class="w-full h-full" style="background: linear-gradient(-180deg, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); display: flex; align-items: center; justify-content: center;">
                 <div class="rounded-lg" style="width: 96%; height: 96%; border: 3px solid ${predominantColor.color100};"></div>
             </div>
             
             <div class="mt-auto p-6 md:p-6 w-full text-left absolute bottom-0" style="background-color: ${predominantColor.color30}">
-                ${useBuffButtonHtml}
                 <div class="sheet-card-text-panel">
                     ${topBarHtml}
                     <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-white">${spellData.name}</h2>
@@ -169,13 +156,6 @@ export async function renderFullSpellSheet(spellData, isModal) {
     sheetContainer.classList.remove('hidden');
     setTimeout(() => sheetContainer.classList.add('visible'), 10);
 
-    const useBuffBtn = document.getElementById(`use-buff-btn-${uniqueId}`);
-    if (useBuffBtn) {
-        useBuffBtn.addEventListener('click', () => {
-             document.dispatchEvent(new CustomEvent('useAbilityInCombat', { detail: { sourceItem: spellData } }));
-        });
-    }
-
     const closeSheet = () => {
         sheetContainer.classList.remove('visible');
         const handler = () => {
@@ -202,3 +182,4 @@ export async function renderFullSpellSheet(spellData, isModal) {
     };
     sheetContainer.addEventListener('click', overlayHandler);
 }
+
