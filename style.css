@@ -11,10 +11,10 @@ html,body{width: 100%; height: 100%;}
   --background-color: #94a3b8; /* slate-400 */
   --text-color: #0f172a; /* slate-900 */
   --text-color-light: #475569; /* slate-600 */
-  
+
   --primary-bg: #4f46e5; /* indigo-600 */
   --primary-text: #ffffff;
-  
+
   --secondary-bg: #64748b; /* slate-500 */
   --secondary-bg-hover: #475569; /* slate-600 */
   --secondary-text: #f1f5f9; /* slate-100 */
@@ -31,11 +31,11 @@ html,body{width: 100%; height: 100%;}
   --thumb-btn-bg: rgba(100, 116, 139, 0.8); /* slate-500 com transparência */
   --thumb-btn-text: #f1f5f9;
   --thumb-btn-border: rgba(255, 255, 255, 0.1);
-  
+
   --menu-bg: #e2e8f0; /* slate-200 */
   --menu-border: #cbd5e1; /* slate-300 */
   --menu-item-text: #1e293b; /* slate-800 */
-  
+
   --splash-bg: #cbd5e1; /* slate-300 */
   --splash-text: #1e293b;
 
@@ -66,7 +66,7 @@ body.dark {
   --thumb-btn-bg: rgba(42, 52, 71, 0.8);
   --thumb-btn-text: #ffffff;
   --thumb-btn-border: rgba(255, 255, 255, 0.1);
-  
+
   --menu-bg: #2a3447;
   --menu-border: #4a5568;
   --menu-item-text: #d1d5db;
@@ -87,9 +87,10 @@ body {
 
 /* Splash Screen */
 .splash-screen {
+  position: absolute;
   background-color: var(--splash-bg);
   transition: opacity 0.5s ease-out;
-  z-index: 10000;
+  z-index: 1000000000000000000000000000000000000000000000000000000000000000000000;
 }
 body.dark .splash-screen .text-white { color: var(--splash-text) !important; }
 .splash-screen .text-white { color: var(--splash-text) !important; }
@@ -116,7 +117,7 @@ body.dark .splash-screen .text-white { color: var(--splash-text) !important; }
 
 @media (min-width: 768px) {
     .main-content {
-        
+
       width: calc(100% - 16rem) !important;
       left: 16rem;
       bottom: 0;
@@ -131,13 +132,13 @@ body.dark .splash-screen .text-white { color: var(--splash-text) !important; }
 #actions-sidebar-1 {
     left: -48px; /* Largura do painel de botões (p-2 + w-8 = 8+32+8=48px) */
     transition: left 0.3s ease-in-out;
-    z-index: 10000000000000;
+    z-index: 100000000;
 }
 
 #actions-sidebar {
     right: -48px; /* Largura do painel de botões (p-2 + w-8 = 8+32+8=48px) */
     transition: right 0.3s ease-in-out;
-    z-index: 10000000000000;
+    z-index: 100000000;
 }
 
 #actions-sidebar-1.active {
@@ -261,7 +262,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
   height: 100%;
   position: relative;
   z-index: 10;
-  
+
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   overflow: visible; /* Garante que o menu não seja cortado */ /* Garante que o menu não seja cortado */
 }
@@ -281,7 +282,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
   justify-content: center;
   border: 2px dashed var(--border-color-dashed);
   color: var(--text-color-light);
-  
+
   background-color: transparent;
   transition: all 0.2s;
 }
@@ -299,13 +300,13 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
 
 .thumb-btn-menu
 {
-  
+
     position: absolute;
     right: -20px;
 }
 .thumb-btn {
   width: 24px;
-  height: 24px;  
+  height: 24px;
   border-radius: 50%;
   background-color: var(--thumb-btn-bg);
   backdrop-filter: blur(4px);
@@ -316,7 +317,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
   font-size: 14px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   border: 1px solid var(--thumb-btn-border);
-  
+
   transition: background-color 0.2s;
 }
 
@@ -333,9 +334,9 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
   border: 1px solid var(--menu-border);
   border-radius: 8px;
   padding: 0.5rem;
-  z-index: 200; 
+  z-index: 200;
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  
+
   /* Estado inicial (escondido) */
   opacity: 0;
   transform: scale(0.95) translateY(-10px);
@@ -375,7 +376,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
   text-align: left;
   border-radius: 6px;
   font-size: 14px;
-  
+
   transition: background-color 0.2s, color 0.2s;
 }
 .menu-item:hover {
@@ -407,7 +408,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
     border-radius: 9999px;
     font-weight: 600;
     margin-right: 1rem;
-    
+
 }
 
 .file-upload-input::-webkit-file-upload-button:hover {
@@ -437,7 +438,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
     background-color: #00000085;
     height: 8px;
     margin-top: 0.25rem;
-    position: relative;    
+    position: relative;
     overflow: hidden;
 }
 
@@ -453,9 +454,9 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
 
 .iconMagic
 {
-  display: flex;  
+  display: flex;
   justify-content: center;
-  align-items: center;  
+  align-items: center;
   flex-direction: column;
 }
 
@@ -478,11 +479,11 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
   scroll-snap-align: start;
   flex-shrink: 0;
   width: 80%;
-  position: relative; 
-  z-index: 1; 
+  position: relative;
+  z-index: 1;
   overflow-y: visible;
-  display: flex; 
-  flex-direction: column;    
+  display: flex;
+  flex-direction: column;
   border-radius: 5px;
   background: linear-gradient(90deg, #0000008f, #000000a4, transparent, transparent);
   justify-content: flex-end;
@@ -492,23 +493,23 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
 
 .scrollable-content
 {
-  display: flex; 
-  flex-direction: row; 
+  display: flex;
+  flex-direction: row;
   overflow-y: scroll;
   gap: 12px; scroll-snap-type: x mandatory;
   display: flex;
   align-items: flex-end;
 }
 
-::-webkit-scrollbar 
+::-webkit-scrollbar
 {
   width: 3px;
   height: 3px;
 }
-  
-  
+
+
 /* Handle */
-::-webkit-scrollbar-thumb 
+::-webkit-scrollbar-thumb
 {
     background: transparent;
     border-radius: 10px;
@@ -658,7 +659,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
 }
 
 #spell-sheet-container, #attack-sheet-container, #item-sheet-container
-{  
+{
     background-color: #000000b8;
     background-blend-mode: multiply;
 }
@@ -758,3 +759,23 @@ body:not(.dark) .text-white { color: var(--text-color) !important; }
   from {opacity: 0;}
   to {opacity:1 ;}
 }
+
+/* *** NOVO: Estilos para Alerta no Topo *** */
+.top-alert-message {
+  opacity: 0;
+  transform: translateY(-30px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  pointer-events: auto; /* Permite clicar se houver ações no futuro */
+}
+
+.top-alert-message.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.btnBatalha
+{
+  width: 40px;
+  height: 40px;
+}
+

@@ -1,4 +1,5 @@
 import { getAspectRatio } from './settings_manager.js';
+import { isCombatActive } from './navigation_manager.js';
 
 function bufferToBlob(buffer, mimeType) {
     return new Blob([buffer], { type: mimeType });
@@ -12,7 +13,7 @@ export async function renderFullAttackSheet(attackData, isModal) {
     {  
         const index = document.getElementsByClassName('visible').length;
         console.log('Z-Index for character sheet modal/in-play:', index);
-        sheetContainer.style.zIndex = 1000 + index;
+        sheetContainer.style.zIndex = 100000000 + index;
     }
 
     const aspectRatio = isModal?  getAspectRatio() : 10/16;
@@ -43,6 +44,9 @@ export async function renderFullAttackSheet(attackData, isModal) {
     const origin = isModal ? "" : "transform-origin: top left";
     const transformProp = isModal ? 'transform: scale(0.9);' : '';
     const uniqueId = `attack-${attackData.id}-${Date.now()}`;
+
+    // A lógica para o botão de buff seria adicionada aqui, se ataques tivessem aumentos temporários.
+    // Por enquanto, vamos omitir, já que o formulário de ataque não os inclui.
 
     const sheetHtml = `
         <button id="close-attack-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-20 thumb-btn" style="display:${isModal? "block": "none"}"><i class="fa-solid fa-xmark"></i></button>
@@ -108,4 +112,3 @@ export async function renderFullAttackSheet(attackData, isModal) {
     };
     sheetContainer.addEventListener('click', overlayHandler);
 }
-

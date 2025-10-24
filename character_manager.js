@@ -541,6 +541,7 @@ export async function saveCharacterCard(cardForm) {
             imageMimeType: imageMimeType,
             backgroundMimeType: backgroundMimeType,
             inPlay: false,
+            activeBuffs: [], // Inicializa a propriedade de buffs
         };
     }
 
