@@ -40,6 +40,15 @@ async function renderCharacterInGame() {
     contentDisplay.classList.add('justify-center'); // Centraliza o card em jogo
 
     if (characterInPlay) {
+        
+        // *** NOVO: Restaura o estado de combate do personagem ***
+        if (characterInPlay.isInCombat) {
+            isCombatModeActive = true;
+        } else {
+            isCombatModeActive = false;
+        }
+        // *** FIM DA MODIFICAÇÃO ***
+
         // A chamada completa só acontece na carga inicial da aba
         await renderFullCharacterSheet(characterInPlay, false, true, contentDisplay);
 
@@ -54,11 +63,19 @@ async function renderCharacterInGame() {
             combatButton.classList.add('bg-green-600', 'hover:bg-green-700');
         }
 
-        combatButton.addEventListener('click', () => {
+        combatButton.addEventListener('click', async () => { // *** TORNADO ASSÍNCRONO ***
             if (isCombatModeActive) {
-                endCombat();
+                endCombat(); // Esta função já é assíncrona
             } else {
                 isCombatModeActive = true;
+
+                // *** NOVO: Salva o estado de combate no DB ***
+                if (characterInPlay) {
+                    characterInPlay.isInCombat = true;
+                    await saveData('rpgCards', characterInPlay);
+                }
+                // *** FIM DA MODIFICAÇÃO ***
+
                 // MODIFICAÇÃO: Apenas atualiza o botão, não recarrega a ficha
                 combatButton.innerHTML = '<i class="fa-solid fa-khanda"></i>';
                 combatButton.classList.remove('bg-green-600', 'hover:bg-green-700');
@@ -183,12 +200,24 @@ async function useAbilityInCombat(sourceItem) {
 async function endCombat() {
     const characterInPlay = (await getData('rpgCards')).find(char => char.inPlay);
     let updated = false;
-    if (characterInPlay && characterInPlay.activeBuffs && characterInPlay.activeBuffs.length > 0) { // Verifica se há buffs para limpar
-        characterInPlay.activeBuffs = []; // Limpa todos os buffs
-        await saveData('rpgCards', characterInPlay);
-        updated = true;
+    if (characterInPlay) { // *** Verificação simplificada ***
+        if (characterInPlay.activeBuffs && characterInPlay.activeBuffs.length > 0) { // Verifica se há buffs para limpar
+            characterInPlay.activeBuffs = []; // Limpa todos os buffs
+            updated = true;
+        }
+
+        // *** NOVO: Limpa o estado de combate no DB ***
+        if (characterInPlay.isInCombat) {
+            characterInPlay.isInCombat = false;
+            updated = true;
+        }
+        // *** FIM DA MODIFICAÇÃO ***
+
+        if (updated) {
+            await saveData('rpgCards', characterInPlay);
+        }
     }
-    isCombatModeActive = false;
+    isCombatModeActive = false; // Define a variável local
 
     // --- MODIFICAÇÃO ---
     // Recarrega a tela inteira "Em Jogo" para garantir que os bônus sejam removidos da UI
@@ -1377,7 +1406,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Desmarca qualquer outro personagem em jogo ao marcar um novo
                 if (isSettingInPlay) {
                     await Promise.all(allCharacters.map(c => {
-                        if (c.inPlay) { c.inPlay = false; return saveData('rpgCards', c); }
+                        if (c.inPlay) { 
+                            c.inPlay = false; 
+                            c.isInCombat = false; // *** NOVO: Limpa o combate do personagem antigo ***
+                            return saveData('rpgCards', c); 
+                        }
                         return null;
                     }));
                 }
@@ -1385,6 +1418,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const charToUpdate = allCharacters.find(c => c.id === cardId);
                 if (charToUpdate) {
                     charToUpdate.inPlay = isSettingInPlay;
+                    if (!isSettingInPlay) { // Se estiver removendo de jogo
+                        charToUpdate.isInCombat = false; // *** NOVO: Limpa o combate ***
+                    }
                     await saveData('rpgCards', charToUpdate);
                 }
                  // Dispara evento para forçar recarregamento da aba atual (Personagens)
