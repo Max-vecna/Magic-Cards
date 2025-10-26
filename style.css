@@ -443,9 +443,8 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
 }
 
 .fa-fire{
-    background: linear-gradient(to bottom, #00c6ff, #7f00ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    
+      
 
       /* Suporte para navegadores baseados em Firefox */
       background-clip: text;
@@ -615,7 +614,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
     position: relative;
     cursor: pointer;
     transition: margin 0.4s ease-in-out, transform 0.4s ease-in-out;
-    margin-left: -45px;
+    margin-left: -30px;
 }
 
 .related-character-grid-item:first-child {
@@ -625,7 +624,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
 /* Estado expandido: cards lado a lado */
 .relationships-grid.expanded .related-character-grid-item {
     margin-left: 4px;
-    margin-right: 10px;
+    margin-right: 2px;
 }
 
 .relationships-grid.expanded .related-character-grid-item:first-child {

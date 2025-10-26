@@ -6,8 +6,8 @@
 export function showCustomConfirm(message) {
     return new Promise((resolve) => {
         const modalHtml = `
-            <div id="custom-confirm-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" style="z-index: 999999;">
-                <div class="bg-gray-800 text-white rounded-lg shadow-2xl p-6 w-full max-w-sm border border-gray-700">
+            <div id="custom-confirm-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" style="z-index: 999999999999999999;">
+                <div class="bg-gray-800 text-white rounded-lg shadow-2xl p-6 w-full max-w-sm border border-gray-700" style="z-index: 999999999999;">
                     <p class="text-center text-lg mb-6">${message}</p>
                     <div class="flex justify-end gap-4">
                         <button id="confirm-cancel-btn" class="py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-700 font-bold">Cancelar</button>
@@ -39,8 +39,8 @@ export function showCustomConfirm(message) {
 export function showCustomAlert(message) {
     const modalId = `custom-alert-modal-${Date.now()}`;
     const modalHtml = `
-        <div id="${modalId}" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" style="z-index: 999999;">
-            <div class="bg-gray-800 text-white rounded-lg shadow-2xl p-6 w-full max-w-sm border border-gray-700">
+        <div id="${modalId}" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" style="z-index: 999999999999999999;">
+            <div class="bg-gray-800 text-white rounded-lg shadow-2xl p-6 w-full max-w-sm border border-gray-700" style="z-index: 999999999999;">
                 <p class="text-center text-lg mb-4">${message}</p>
                 <button class="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 font-bold">OK</button>
             </div>
@@ -62,8 +62,8 @@ export function showMultiplierPrompt({ title = "Usar Habilidade", baseCost = 0, 
     return new Promise((resolve) => {
         const modalId = `multiplier-prompt-modal-${Date.now()}`;
         const modalHtml = `
-            <div id="${modalId}" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" style="z-index: 999999999999;">
-                <div class="bg-gray-800 text-white rounded-lg shadow-2xl p-6 w-full max-w-sm border border-gray-700">
+            <div id="${modalId}" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" style="z-index: 999999999999999999;">
+                <div class="bg-gray-800 text-white rounded-lg shadow-2xl p-6 w-full max-w-sm border border-gray-700" style="z-index: 999999999999;">
                     <h3 class="text-xl font-bold text-center mb-4">${title}</h3>
                     <p class="text-sm text-gray-400 text-center mb-1">Custo base: ${baseCost} ${costType}</p>
                     <div class="my-4">

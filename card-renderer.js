@@ -103,7 +103,7 @@ export async function updateStatDisplay(sheetContainer, characterData) {
     const vidaMaxContainer = sheetContainer.querySelector('[data-stat-type="vida"]');
     if (vidaMaxContainer) {
         vidaMaxContainer.dataset.statMax = permanentMaxVida; // Atualiza o dataset para o editor
-        // *** MODIFICAÇÃO: Seletor mais robusto ***
+        // *** MODIFIFCAÇÃO: Seletor mais robusto ***
         const vidaMaxEl = vidaMaxContainer.querySelector('[data-stat-max-display="vida"]');
         if (vidaMaxEl) vidaMaxEl.textContent = permanentMaxVida;
     }
@@ -127,6 +127,15 @@ export async function updateStatDisplay(sheetContainer, characterData) {
     const dinheiroEl = sheetContainer.querySelector('[data-stat-current="dinheiro"]');
     if (dinheiroEl) {
         dinheiroEl.textContent = characterData.dinheiro || 0;
+        
+        // --- MODIFICAÇÃO (Ocultar Dinheiro) ---
+        // Oculta o contêiner pai se o dinheiro for 0 ou indefinido
+        const moneyContainer = dinheiroEl.closest('.money-container');
+        if (moneyContainer) {
+             const hasMoney = (characterData.dinheiro || 0) > 0;
+             moneyContainer.style.display = hasMoney ? 'flex' : 'none'; // 'flex' é o display padrão do container
+        }
+        // --- FIM DA MODIFICAÇÃO ---
     }
     
     // ATUALIZAÇÃO BÔNUS: Atualiza também os stats de combate e atributos
@@ -144,9 +153,9 @@ export async function updateStatDisplay(sheetContainer, characterData) {
                 const fixedBonus = totalFixedBonuses[stat] || 0;
                 const tempBonus = totalTemporaryBonuses[stat] || 0;
                 const totalValue = baseValue + fixedBonus + tempBonus; // Calculate total including temp
-                const fixedBonusHtml = fixedBonus !== 0 ? `<span class="text-green-400 font-bold ml-1">${fixedBonus > 0 ? '+ ' : ''}${fixedBonus}</span>` : '';
+                const fixedBonusHtml = fixedBonus !== 0 ? `<span class="text-green-400 font-bold ml-1">${fixedBonus > 0 ? '+' : ''}${fixedBonus}</span>` : '';
                 // MODIFICATION: Show tempBonus for combat stats
-                const tempBonusHtml = tempBonus !== 0 ? `<span class="text-blue-400 font-bold ml-1">${tempBonus > 0 ? '+ ' : ''}${tempBonus}</span>` : '';
+                const tempBonusHtml = tempBonus !== 0 ? `<span class="text-blue-400 font-bold ml-1">${tempBonus > 0 ? '+' : ''}${tempBonus}</span>` : '';
                 const suffix = stat === 'deslocamento' ? 'm' : '';
                 // Displaying base + fixed + temp, or just total depending on preference. Let's show base + bonuses.
                 // el.innerHTML = `${label}<br>${totalValue}${suffix}`; // Alternative: Show total
@@ -362,8 +371,6 @@ function setupStatEditor(characterData, container, initialTempBonuses) { // Rena
     const inputEl = modal.querySelector('#stat-editor-value');
     const addBtn = modal.querySelector('#stat-editor-add-btn');
     const subtractBtn = modal.querySelector('#stat-editor-subtract-btn');
-    // MODIFICAÇÃO: Selecionar o novo botão
-    const addTempBtn = modal.querySelector('#stat-editor-add-temp-btn');
     const closeBtn = modal.querySelector('#stat-editor-close-btn');
     const tempContainer = modal.querySelector('#stat-editor-temp-container');
     const tempValueInput = modal.querySelector('#stat-editor-temp-value');
@@ -553,62 +560,6 @@ function setupStatEditor(characterData, container, initialTempBonuses) { // Rena
         });
     };
 
-    // MODIFICAÇÃO: Nova função para adicionar/remover bônus temporário
-    const updateTempStat = (amount) => {
-        if (!currentStat || isNaN(amount) || amount === 0 || (currentStat !== 'vida' && currentStat !== 'mana')) {
-            if (amount === 0) closeModal();
-            return;
-        }
-
-        if (!characterData.activeBuffs) {
-            characterData.activeBuffs = [];
-        }
-
-        // Cria um novo objeto de buff
-        const newBuff = {
-            nome: currentStat, // 'vida' or 'mana'
-            valor: amount
-        };
-
-        // Procura por uma fonte de "Ajuste Manual"
-        const manualBuffSourceId = 'manual-buff-source';
-        let manualBuffSource = characterData.activeBuffs.find(bs => bs.sourceId === manualBuffSourceId);
-
-        if (manualBuffSource) {
-            // Se a fonte existe, procura por um buff existente para este stat
-            let existingBuff = manualBuffSource.buffs.find(b => b.nome === currentStat);
-            if (existingBuff) {
-                existingBuff.valor += amount; // Adiciona ou subtrai do buff manual existente
-            } else {
-                manualBuffSource.buffs.push(newBuff); // Adiciona um novo buff (vida ou mana) a esta fonte
-            }
-        } else {
-            // Se a fonte não existe, cria uma nova
-            manualBuffSource = {
-                sourceId: manualBuffSourceId,
-                sourceName: "Ajuste Manual",
-                buffs: [newBuff]
-            };
-            characterData.activeBuffs.push(manualBuffSource);
-        }
-
-        // --- Lógica de Limpeza ---
-        // Remove buffs com valor 0 ou negativo desta fonte
-        manualBuffSource.buffs = manualBuffSource.buffs.filter(b => b.valor > 0);
-        // Remove a fonte de buff manual se ela não tiver mais buffs
-        characterData.activeBuffs = characterData.activeBuffs.filter(bs => bs.buffs.length > 0);
-
-        // Salva, atualiza a UI e fecha
-        saveData('rpgCards', characterData).then(async () => {
-            await updateStatDisplay(sheetContainer, characterData);
-            closeModal();
-        }).catch(err => {
-            console.error("Failed to save character data:", err);
-            closeModal();
-        });
-    };
-
-
     // --- Event Listener Setup ---
     // Clone and replace buttons to ensure old listeners are removed
     const newAddBtn = addBtn.cloneNode(true);
@@ -617,16 +568,9 @@ function setupStatEditor(characterData, container, initialTempBonuses) { // Rena
     subtractBtn.parentNode.replaceChild(newSubtractBtn, subtractBtn);
     const newCloseBtn = closeBtn.cloneNode(true);
     closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-    // MODIFICAÇÃO: Clonar e substituir o novo botão
-    const newAddTempBtn = addTempBtn.cloneNode(true);
-    addTempBtn.parentNode.replaceChild(newAddTempBtn, addTempBtn);
-
 
     newAddBtn.addEventListener('click', () => updateStat(Math.abs(parseInt(inputEl.value, 10) || 0)));
     newSubtractBtn.addEventListener('click', () => updateStat(-Math.abs(parseInt(inputEl.value, 10) || 0)));
-    // MODIFICAÇÃO: Adicionar listener para o botão de tempo
-    // Usa o valor exato (positivo ou negativo) do input
-    newAddTempBtn.addEventListener('click', () => updateTempStat(parseInt(inputEl.value, 10) || 0));
     newCloseBtn.addEventListener('click', closeModal);
 
     // Close modal on Escape key
@@ -664,7 +608,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
 
     if (isModal) {
         const index = document.getElementsByClassName('visible').length;
-        sheetContainer.style.zIndex = 100000000 + index;
+        sheetContainer.style.zIndex = 1000 + index;
         sheetContainer.classList.remove('hidden');
     }
 
@@ -708,7 +652,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
 
     const sabTotal = (parseInt(characterData.attributes.sabedoria) || 0) + (totalFixedBonuses.sabedoria || 0) + (totalTemporaryBonuses.sabedoria || 0);
     const cdValue = 10 + (parseInt(characterData.level) || 0) + sabTotal;
-    const palette = { borderColor: predominantColor.color100 };
+    const palette = { borderColor: predominantColor.colorLight };
 
     const origin = isModal || isInPlay ? "" : "transform-origin: top left";
 
@@ -761,9 +705,9 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
         const sortedAttributes = Object.keys(groupedPericias).sort();
         periciasHtml = sortedAttributes.map(attribute => {
             const periciasList = groupedPericias[attribute].sort((a,b) => a.name.localeCompare(b.name)).map(p => { // Sort pericias within group
-                const bonusHtml = p.bonus !== 0 ? ` <span class="text-green-400 font-semibold">${p.bonus > 0 ? '+ ' : ''}${p.bonus}</span>` : '';
+                const bonusHtml = p.bonus !== 0 ? ` <span class="text-green-400 font-semibold">${p.bonus > 0 ? '+' : ''}${p.bonus}</span>` : '';
                 // MODIFICATION: Show temporary bonus for pericias
-                const tempBonusHtml = p.tempBonus !== 0 ? ` <span class="text-blue-400 font-semibold">${p.tempBonus > 0 ? '+ ' : ''}${p.tempBonus}</span>` : '';
+                const tempBonusHtml = p.tempBonus !== 0 ? ` <span class="text-blue-400 font-semibold">${p.tempBonus > 0 ? '+' : ''}${p.tempBonus}</span>` : '';
                 return `<span class="text-xs text-gray-300">${p.name} ${p.base}${bonusHtml}${tempBonusHtml};</span>`;
             }).join(' ');
             return `<div class="text-left mt-1"><p class="text-xs font-bold text-gray-200 uppercase" style="font-size: 11px;">${attribute}</p><div class="flex flex-wrap gap-x-2 gap-y-1 mb-1">${periciasList}</div></div>`;
@@ -775,9 +719,9 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
         const baseValue = characterData.attributes[stat] || 0;
         const fixedBonus = totalFixedBonuses[stat] || 0;
         const tempBonus = totalTemporaryBonuses[stat] || 0;
-        const fixedBonusHtml = fixedBonus !== 0 ? `<span class="text-green-400 font-bold ml-1" style='transform>${fixedBonus > 0 ? '+ ' : ''}${fixedBonus}</span>` : '';
+        const fixedBonusHtml = fixedBonus !== 0 ? `<span class="text-green-400 font-bold ml-1">${fixedBonus > 0 ? '+' : ''}${fixedBonus}</span>` : '';
         // MODIFICATION: Show temporary bonus for combat stats
-        const tempBonusHtml = tempBonus !== 0 ? `<span class="text-blue-400 font-bold ml-1">${tempBonus > 0 ? '+ ' : ''}${tempBonus}</span>` : '';
+        const tempBonusHtml = tempBonus !== 0 ? `<span class="text-blue-400 font-bold ml-1">${tempBonus > 0 ? '+' : ''}${tempBonus}</span>` : '';
         const suffix = stat === 'deslocamento' ? 'm' : '';
         // Display base + fixed + temp bonuses
         return `<div class="text-center">${label}<br>${baseValue}${suffix}${fixedBonusHtml}${tempBonusHtml}</div>`;
@@ -811,41 +755,71 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     const permanentMaxVida = (characterData.attributes.vida || 0) + (totalFixedBonuses.vida || 0);
     const permanentMaxMana = (characterData.attributes.mana || 0) + (totalFixedBonuses.mana || 0);
 
+    // --- INÍCIO DA MODIFICAÇÃO (Lógica Condicional) ---
+
+    // Verifica se há algum conteúdo de lore
+    const hasLore = characterData.lore && (characterData.lore.historia || characterData.lore.personalidade || characterData.lore.motivacao);
+    
+    // Define o estilo do ícone de lore
+    const loreIconStyle = hasLore ? "top:90px" : "display: none;";
+
+    // Gera o HTML para as seções de lore (ou string vazia se não houver)
+    const loreHistoriaHtml = characterData.lore?.historia
+        ? `<h4>História</h4><p class="mb-4">${characterData.lore.historia}</p>`
+        : '';
+    const lorePersonalidadeHtml = characterData.lore?.personalidade
+        ? `<h4>Personalidade</h4><p class="mb-4">${characterData.lore.personalidade}</p>`
+        : '';
+    const loreMotivacaoHtml = characterData.lore?.motivacao
+        ? `<h4>Motivação</h4><p>${characterData.lore.motivacao}</p>`
+        : '';
+
+    // Verifica se há dinheiro
+    const hasMoney = (characterData.dinheiro || 0) > 0;
+    const hasMana = (characterData.mana) > 0;
+    
+    // Define o estilo do contêiner de dinheiro
+    const moneyContainerStyle = hasMoney
+        ? "writing-mode: vertical-rl; text-orientation: upright; top: 141px;" // Estilo original
+        : "display: none;"; // Oculta se não tiver dinheiro
+
+    // --- FIM DA MODIFICAÇÃO ---
+
 
     const sheetHtml = `
             <div class="absolute top-6 right-6 z-20 flex flex-col gap-2">
                  <button id="close-sheet-btn-${uniqueId}" class="bg-red-600 hover:text-white thumb-btn" style="display: ${isModal ? 'flex' : 'none'}"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="character-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white" style="${origin}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; box-shadow: 0 0 20px ${predominantColor.color100}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto;">
+            <div id="character-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white" style="${origin}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; box-shadow: 0 0 20px ${predominantColor.colorLight}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto;">
             <div class="w-full h-full" style="background: linear-gradient(-180deg, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); display: flex; align-items: center; justify-content: center;">
-                <div class="rounded-lg" style="width: 96%; height: 96%; border: 3px solid ${predominantColor.color100};"></div>
+                <div class="rounded-lg" style="width: 96%; height: 96%; border: 3px solid ${predominantColor.colorLight};"></div>
             </div>
             <!-- Vida Display -->
             <div class="absolute top-6 right-4 p-2 rounded-full text-center cursor-pointer" data-action="edit-stat" data-stat-type="vida" data-stat-max="${permanentMaxVida}">
-                <i class="fas fa-heart text-red-500 text-4xl fa-beat"></i>
+                <i class="fa-solid fa-heart text-5xl" style="background:  linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
                 <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none">
                     <span data-stat-current="vida">
                         ${characterData.attributes.vidaAtual || 0}
                         ${(totalTemporaryBonuses.vida || 0) > 0 ? `<span class="text-blue-400 font-semibold">+ ${totalTemporaryBonuses.vida}</span>` : ''}
                     </span>
                     <hr style="width: 15px;">
-                    <span data-stat-max-display="vida">
+                    <span data-stat-max-display="vida" style="bottom: 12px;">
                         ${permanentMaxVida}
                     </span>
                 </div>
             </div>
-            <div class="absolute top-6 left-1/2 -translate-x-1/2 text-center z-10">
+            <div id="lore-icon-${uniqueId}" class="absolute top-8 left-1/2 -translate-x-1/2 text-center z-10"  data-action="toggle-lore">
                 <h3 class="text-2xl font-bold">${characterData.title}</h3>
                 <p class="text-md italic text-gray-300">${characterData.subTitle}</p>
             </div>
              <!-- Mana Display -->
             <div class="absolute top-6 left-4 p-2 rounded-full text-center cursor-pointer" style="display: flex; justify-content: center; flex-direction: column;">
-                <div class="icon-container mana-icon-container" data-action="edit-stat" data-stat-type="mana" data-stat-max="${permanentMaxMana}">
-                    <i class="fa-brands fa-gripfire text-blue-500 text-5xl"></i>
+                <div class="mb-4 icon-container mana-icon-container" data-action="edit-stat" data-stat-type="mana" data-stat-max="${permanentMaxMana}" style="${hasMana ? 'display: none' : ''}">
+                    <i class="fas fa-fire text-blue-500 text-5xl" style="background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
                     <div class="absolute left-0 right-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none" style="top: 20px;">
                         <span data-stat-current="mana">
                             ${characterData.attributes.manaAtual || 0}
-                            ${(totalTemporaryBonuses.mana || 0) > 0 ? `<span class="text-red-400 font-semibold">+ ${totalTemporaryBonuses.mana}</span>` : ''}
+                            ${(totalTemporaryBonuses.mana || 0) > 0 ? `<span class="text-blue-400 font-semibold">+ ${totalTemporaryBonuses.mana}</span>` : ''}
                         </span>
                         <hr style="width: 15px;">
                         <!-- *** MODIFICAÇÃO: Atributo de dados adicionado *** -->
@@ -854,10 +828,9 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                         </span>
                     </div>
                 </div>
-                <div id="lore-icon-${uniqueId}" class="mt-4 rounded-full p-3 flex items-center justify-center text-lg text-yellow-200 cursor-pointer" data-action="toggle-lore" style="top:90px">
-                    <i class="fas fa-book" style="font-size: 14px;"></i>
-                </div>
-                <div class="money-container mt-4 rounded-full p-2 flex items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="writing-mode: vertical-rl; text-orientation: upright; top: 141px;">
+               
+                <!-- *** MODIFICAÇÃO (Money Container Style) *** -->
+                <div class="money-container rounded-full p-2 flex items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="${moneyContainerStyle}">
                     💰$<span data-stat-current="dinheiro">${characterData.dinheiro || 0}</span>
                 </div>
             </div>
@@ -869,13 +842,12 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                     <h2 class="text-2xl font-bold mb-4 border-b pb-2">Lore do Personagem</h2>
+                    <!-- *** MODIFICAÇÃO (Lore Content) *** -->
                     <div id="lore-content" class="text-sm leading-relaxed overflow-y-auto max-h-96">
-                        <h4>História</h4>
-                        <p class="mb-4">${characterData.lore?.historia || "Nenhuma história definida."}</p>
-                        <h4>Personalidade</h4>
-                        <p class="mb-4">${characterData.lore?.personalidade || "Nenhuma personalidade definida."}</p>
-                        <h4>Motivação</h4>
-                        <p>${characterData.lore?.motivacao || "Nenhuma motivação definida."}</p>
+                        ${loreHistoriaHtml}
+                        ${lorePersonalidadeHtml}
+                        ${loreMotivacaoHtml}
+                        ${!hasLore ? '<p class="italic text-gray-400">Nenhuma lore definida.</p>' : ''}
                     </div>
                 </div>
             </div>
@@ -894,9 +866,9 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                         const baseValue = parseInt(characterData.attributes[key]) || 0;
                         const fixedBonus = totalFixedBonuses[key] || 0;
                         const tempBonus = totalTemporaryBonuses[key] || 0;
-                        const fixedBonusHtml = fixedBonus !== 0 ? ` <span class="text-green-400 font-semibold">${fixedBonus > 0 ? '+ ' : ''}${fixedBonus}</span>` : '';
+                        const fixedBonusHtml = fixedBonus !== 0 ? ` <span class="text-green-400 font-semibold">${fixedBonus > 0 ? '+' : ''}${fixedBonus}</span>` : '';
                          // MODIFICATION: Show temporary bonus on attributes display
-                        const tempBonusHtml = tempBonus !== 0 ? ` <span class="text-blue-400 font-semibold">${tempBonus > 0 ? '+ ' : ''}${tempBonus}</span>` : '';
+                        const tempBonusHtml = tempBonus !== 0 ? ` <span class="text-blue-400 font-semibold">${tempBonus > 0 ? '+' : ''}${tempBonus}</span>` : '';
                         const totalValue = baseValue + fixedBonus + tempBonus; // Total value including temp for bar scaling
                         const percentage = maxAttributeValue > 0 ? (totalValue * 100) / maxAttributeValue : 0;
                         return `
@@ -1007,7 +979,13 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     };
 
     if (loreIcon && loreModal && closeLoreModalBtn) {
-        loreIcon.addEventListener('click', () => loreModal.classList.remove('hidden'));
+        // --- MODIFICAÇÃO (Ocultar Lore) ---
+        // Apenas adiciona o listener se o ícone estiver visível
+        if (hasLore) {
+            loreIcon.addEventListener('click', () => loreModal.classList.remove('hidden'));
+        }
+        // --- FIM DA MODIFICAÇÃO ---
+        
         closeLoreModalBtn.addEventListener('click', () => loreModal.classList.add('hidden'));
          // Close lore modal on Escape key
          loreModal.addEventListener('keydown', (e) => {
