@@ -126,19 +126,8 @@ export async function updateStatDisplay(sheetContainer, characterData) {
     // Atualiza Dinheiro
     const dinheiroEl = sheetContainer.querySelector('[data-stat-current="dinheiro"]');
     if (dinheiroEl) {
-        dinheiroEl.textContent = characterData.dinheiro || 0;
-        
-        // --- MODIFICAÇÃO (Ocultar Dinheiro) ---
-        // Oculta o contêiner pai se o dinheiro for 0 ou indefinido
-        const moneyContainer = dinheiroEl.closest('.money-container');
-        if (moneyContainer) {
-             const hasMoney = (characterData.dinheiro || 0) > 0;
-             moneyContainer.style.display = hasMoney ? 'flex' : 'none'; // 'flex' é o display padrão do container
-        }
-        // --- FIM DA MODIFICAÇÃO ---
+        dinheiroEl.textContent = characterData.dinheiro || 0;        
     }
-    
-    // ATUALIZAÇÃO BÔNUS: Atualiza também os stats de combate e atributos
     
     // Stats de Combate
     const combatStats = { armadura: 'CA', esquiva: 'ES', bloqueio: 'BL', deslocamento: 'DL' };
@@ -830,7 +819,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                 </div>
                
                 <!-- *** MODIFICAÇÃO (Money Container Style) *** -->
-                <div class="money-container rounded-full p-2 flex items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="${moneyContainerStyle}">
+                <div class="money-container rounded-full p-2 flex items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="${moneyContainerStyle} background: linear-gradient(to bottom, rgba(6, 24, 41, 0.3), rgb(43, 54, 64));">
                     💰$<span data-stat-current="dinheiro">${characterData.dinheiro || 0}</span>
                 </div>
             </div>

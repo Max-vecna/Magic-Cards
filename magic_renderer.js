@@ -78,7 +78,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
     let statsHtml = '';
     if (hasStatsInfo) {
         statsHtml = `
-            <div class="grid grid-cols-5 gap-x-2 text-xs my-2 text-center text-gray-200">
+            <div class="grid grid-cols-5 gap-x-2 text-xs mt-2 text-center text-gray-200">
                 <div>
                     <p class="font-bold tracking-wider">EX</p>
                     <p class="text-gray-300 truncate" title="${spellData.execution || '-'}">${spellData.execution || '-'}</p>
@@ -109,54 +109,50 @@ export async function renderFullSpellSheet(spellData, isModal) {
         const circleText = spellData.circle > 0 ? `${spellData.circle}º Círculo` : '';
         const manaText = spellData.manaCost > 0 ? `${spellData.manaCost} PM` : '';
         const separator = circleText && manaText ? ' - ' : '';
-        topBarHtml = `<p class="text-sm font-medium">${circleText}${separator}${manaText}</p>`;
+        topBarHtml = `<p class="" style="font-size: 10px;">${circleText}${separator}${manaText}</p>`;
     }
 
     const hasTemporaryAumentos = spellData.aumentos && spellData.aumentos.some(a => a.tipo === 'temporario');
     const hasManaCost = spellData.manaCost && spellData.manaCost > 0;
-    const useBuffButtonHtml = isCombatActive() && (hasTemporaryAumentos || hasManaCost) ? `
-        <button id="use-buff-btn-${uniqueId}" class="absolute top-0 right-0 -translate-x-1/2 -translate-y-1/2 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-indigo-700 transition-colors z-20" style='background-color: ${predominantColor.color100}'>
-            Usar
-        </button>
-    ` : '';
+    
 
     const sheetHtml = `
         <button id="close-spell-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-20 thumb-btn" style="display:${isModal? "block": "none"};"><i class="fa-solid fa-xmark"></i></button>
         <div id="spell-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white" style="${origin}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; box-shadow: 0 0 20px ${predominantColor.color100}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto;">        
             
             <div class="w-full h-full" style="background: linear-gradient(-180deg, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); display: flex; align-items: center; justify-content: center;">
-                <div class="rounded-lg" style="width: 96%; height: 96%; border: 3px solid ${predominantColor.color100};"></div>
+                <div class="rounded-lg" style="width: 100%; height: calc(100% - 20px); border: 3px solid ${predominantColor.color100}; margin: 10px;"></div>
             </div>
             
-            <div class="mt-auto p-6 md:p-6 w-full text-left absolute bottom-0" style="background-color: ${predominantColor.color30}">
-                ${useBuffButtonHtml}
-                <div class="sheet-card-text-panel">
-                    ${topBarHtml}
-                    <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-white">${spellData.name}</h2>
-                
-                    ${hasTopBarInfo || hasStatsInfo ? '<div class="sheet-card-divider"></div>' : ''}
-                    ${statsHtml}
+            <div class="w-full text-left absolute top-0" style="background-color: ${predominantColor.color30}; padding-top: 15px; padding-bottom: 10px; text-align: center;">
+                <h3 class="text-2xl md:text-3xl font-bold tracking-tight text-white">${spellData.name}</h3>
+                ${topBarHtml}
+            </div>
+
+            <div class="mt-auto p-6 pt-3 md:p-6 w-full text-left absolute bottom-0" style="background-color: ${predominantColor.color30}">                
+                <div class="sheet-card-text-panel">                      
                     <div class="space-y-3 max-h-32 overflow-y-auto pr-2">
                         ${spellData.description ? `
-                            <div class="pt-2">
+                            <div>
                                 <h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3>
-                                <p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6">${spellData.description || 'Nenhuma descrição.'}</p>
+                                <p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.description || 'Nenhuma descrição.'}</p>
                             </div>
                         ` : ''}
                         ${(spellData.enhance && spellData.type !== 'habilidade') ? `
                             <div class="pt-2">
                                 <h3 class="text-sm font-semibold flex items-center gap-2">Aprimorar</h3>
-                                <p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6">${spellData.enhance || 'Nenhuma descrição.'}</p>
+                                <p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.enhance || 'Nenhuma descrição.'}</p>
                             </div>
                         ` : ''}
                         ${(spellData.true && spellData.type !== 'habilidade') ? `
                             <div class="pt-2">
                                 <h3 class="text-sm font-semibold flex items-center gap-2">Verdadeiro</h3>
-                                <p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6">${spellData.true || 'Nenhuma descrição.'}</p>
+                                <p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.true || 'Nenhuma descrição.'}</p>
                             </div>
                         ` : ''}
                         ${aumentosHtml}
                     </div>
+                    ${statsHtml}
                 </div>
             </div>            
         </div>

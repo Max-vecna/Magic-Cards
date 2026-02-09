@@ -53,7 +53,7 @@ async function renderCharacterInGame() {
 
         const combatButton = document.createElement('button');
         combatButton.id = 'combat-mode-btn';
-        combatButton.className = 'absolute top-4 left-4 z-20 rounded-full font-bold text-white transition-colors shadow-lg btnBatalha';
+        combatButton.className = 'absolute top-4 left-4 z-20 rounded-full font-bold text-white transition-colors shadow-lg btnBatalha hidden';
         if (isCombatModeActive) {
             combatButton.innerHTML = '<i class="fa-solid fa-khanda"></i>';
             combatButton.classList.add('bg-red-600', 'hover:bg-red-700');

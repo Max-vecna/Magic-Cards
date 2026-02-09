@@ -60,7 +60,7 @@ export async function renderFullItemSheet(itemData, isModal) {
         detailsHtml = `
             <div class="pt-2">
                 <h3 class="text-sm font-semibold flex items-center gap-2">Detalhes</h3>
-                <div class="text-gray-300 text-xs leading-relaxed mt-1 pl-6 space-y-1">
+                <div class="text-gray-300 text-xs leading-relaxed mt-1 pl-6 space-y-1" style="white-space: break-spaces;">
                     <ul class="list-disc list-inside">
                         ${details.map(d => `<li><span class="font-semibold">${d.label}:</span> ${d.value}</li>`).join('')}
                     </ul>
