@@ -124,7 +124,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
                 <div class="rounded-lg" style="width: 100%; height: calc(100% - 20px); border: 3px solid ${predominantColor.color100}; margin: 10px;"></div>
             </div>
             
-            <div class="w-full text-left absolute top-0" style="background-color: ${predominantColor.color30}; padding-top: 15px; padding-bottom: 10px; text-align: center;">
+            <div class="w-full text-left absolute top-0" style="background-color: ${predominantColor.color30}; padding-top: 20px; padding-bottom: 10px; text-align: center;">
                 <h3 class="text-2xl md:text-3xl font-bold tracking-tight text-white">${spellData.name}</h3>
                 ${topBarHtml}
             </div>
