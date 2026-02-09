@@ -124,14 +124,14 @@ export async function renderFullSpellSheet(spellData, isModal) {
                 <div class="rounded-lg" style="width: 100%; height: calc(100% - 20px); border: 3px solid ${predominantColor.color100}; margin: 10px;"></div>
             </div>
             
-            <div class="w-full text-left absolute top-0" style="background-color: ${predominantColor.color30}; padding-top: 20px; padding-bottom: 10px; text-align: center;">
-                <h3 class="text-2xl md:text-3xl font-bold tracking-tight text-white">${spellData.name}</h3>
+            <div class="w-full text-left absolute top-0 line-top" style="background-color: ${predominantColor.color30}; padding-top: 20px; padding-bottom: 10px; text-align: center; --minha-cor: ${predominantColor.color100};">
+            <h3 class="font-bold tracking-tight text-white" style="font-size: 1.3rem">${spellData.name}</h3>
                 ${topBarHtml}
             </div>
 
-            <div class="mt-auto p-6 pt-3 md:p-6 w-full text-left absolute bottom-0" style="background-color: ${predominantColor.color30}">                
+            <div class="mt-auto p-6 pt-3 md:p-6 w-full text-left absolute bottom-0 line-bottom" style="background-color: ${predominantColor.color30}; --minha-cor: ${predominantColor.color100};">                
                 <div class="sheet-card-text-panel">                      
-                    <div class="space-y-3 max-h-32 overflow-y-auto pr-2">
+                    <div class="space-y-3 overflow-y-auto pr-2" style="max-height: 12rem; height: 12rem">
                         ${spellData.description ? `
                             <div>
                                 <h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3>

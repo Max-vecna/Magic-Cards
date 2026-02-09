@@ -837,3 +837,22 @@ body:not(.dark) .text-white { color: var(--text-color) !important; }
   height: 40px;
 }
 
+.line-bottom::after
+{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    border: 1px solid var(--minha-cor);
+}
+
+.line-top::before
+{
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 50%;
+    border: 1px solid var(--minha-cor);
+}

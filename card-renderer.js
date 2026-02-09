@@ -350,7 +350,12 @@ async function populateInventory(container, characterData, uniqueId) {
 }
 
 function setupStatEditor(characterData, container, initialTempBonuses) { // Renamed parameter
-    const sheetContainer = container || document.getElementById('character-sheet-container');
+    
+    const sheetContainer =
+    container ||
+    document.querySelector('#nested-sheet-container.visible') ||
+    document.querySelector('#character-sheet-container.visible');
+
     const modal = document.getElementById('stat-editor-modal');
     if (!sheetContainer || !modal) return;
 
