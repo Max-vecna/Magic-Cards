@@ -678,7 +678,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
     cursor: pointer;
 }
 
-.view-section
+#view-personagem-em-jogo
 {
     display: flex;
     align-items: center;
