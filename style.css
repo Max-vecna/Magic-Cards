@@ -4,7 +4,13 @@
 #character-sheet-container, 
 #spell-sheet-container, 
 #item-sheet-container,
-#nested-sheet-container {
+#nested-sheet-container,
+#creation-section, 
+#spell-creation-section, 
+#item-creation-section, 
+#attack-creation-section,
+#attack-sheet-container,
+#grimoire-editor-container {
     opacity: 0;
     pointer-events: none;
     -webkit-backdrop-filter: blur(0px);
@@ -16,7 +22,13 @@
 #character-sheet-container.visible, 
 #spell-sheet-container.visible, 
 #item-sheet-container.visible,
-#nested-sheet-container.visible {
+#nested-sheet-container.visible,
+#creation-section:not(.hidden), 
+#spell-creation-section:not(.hidden), 
+#item-creation-section:not(.hidden), 
+#attack-creation-section:not(.hidden),
+#attack-sheet-container.visible,
+#grimoire-editor-container:not(.hidden) {
     opacity: 1;
     pointer-events: auto;
     -webkit-backdrop-filter: blur(4px);
@@ -666,7 +678,11 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
     cursor: pointer;
 }
 
-.related-character-grid-item {
+.related-character-grid-item,
+.related-spell-grid-item,
+.related-attack-grid-item,
+.related-item-grid-item,
+.related-skill-grid-item {
     flex-shrink: 0;
     width: 60px;
     height: 92px;
@@ -676,22 +692,38 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
     margin-left: -30px;
 }
 
-.related-character-grid-item:first-child {
+.related-character-grid-item:first-child,
+.related-spell-grid-item:first-child,
+.related-attack-grid-item:first-child,
+.related-item-grid-item:first-child,
+.related-skill-grid-item:first-child {
     margin-left: 0;
 }
 
 /* Estado expandido: cards lado a lado */
-.relationships-grid.expanded .related-character-grid-item {
+.relationships-grid.expanded .related-character-grid-item,
+.relationships-grid.expanded .related-spell-grid-item,
+.relationships-grid.expanded .related-attack-grid-item,
+.relationships-grid.expanded .related-item-grid-item,
+.relationships-grid.expanded .related-skill-grid-item {
     margin-left: 4px;
     margin-right: 2px;
 }
 
-.relationships-grid.expanded .related-character-grid-item:first-child {
-    margin-left: 4px;
+.relationships-grid.expanded .related-character-grid-item:first-child,
+.relationships-grid.expanded .related-spell-grid-item:first-child,
+.relationships-grid.expanded .related-attack-grid-item:first-child,
+.relationships-grid.expanded .related-item-grid-item:first-child,
+.relationships-grid.expanded .related-skill-grid-item:first-child {
+    margin-left: 0px;
 }
 
 
-.related-character-grid-item > div[id^="character-sheet-"] { /* This targets the character-sheet div inside */
+.related-character-grid-item > div[id^="character-sheet-"],
+.related-spell-grid-item > div[id^="spell-sheet-"],
+.related-attack-grid-item > div[id^="attack-sheet-"],
+.related-item-grid-item > div[id^="item-sheet-"],
+.related-skill-grid-item > div[id^="spell-sheet-"] { 
     transform: scale(0.11) !important;
     transform-origin: top left;
     box-shadow: 0 2px 8px rgba(0,0,0,0.7) !important;
@@ -855,4 +887,130 @@ body:not(.dark) .text-white { color: var(--text-color) !important; }
     right: 0;
     width: 50%;
     border: 1px solid var(--minha-cor);
+}
+
+/* Container Principal do Badge */
+.badge-wrapper {
+    position: relative;
+    width: 150px; /* Reduzido de 200px para 150px */
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+/* Área do Texto (SVG) */
+.text-ring {
+    position: absolute;
+    width: 80%;
+    height: 80%; 
+}
+
+/* Estilo do Texto Curvado */
+.text-ring text {
+    font-size: 11px; /* Diminuído para manter a proporção */
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    fill: #e2e8f0;
+}
+
+/* Miolo Central (O Círculo Branco) */
+.center-content {
+    position: relative;
+    width: 80px; /* Reduzido de 110px para 80px */
+    height: 80px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    border: 3px solid #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+/* Ícone de Alvo */
+.icon-target {
+    width: 28px; /* Reduzido de 35px para 28px */
+    height: 28px;
+    stroke: #ef4444;
+    stroke-width: 2;
+    fill: none;
+    margin-bottom: 2px;
+}
+
+/* Texto Central (NOMEI) */
+.brand-name {
+    font-size: 12px; /* Reduzido de 16px para 12px */
+    font-weight: 900;
+    color: #1e293b;
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+/* --- ESTILOS PARA OS MODAIS DE CRIAÇÃO --- */
+
+#creation-section, 
+#spell-creation-section, 
+#item-creation-section, 
+#attack-creation-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Assegura que fica acima de tudo */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.form-container {
+    background-color: var(--form-bg);
+    max-height: 90vh; /* Limita a altura para 90% da janela */
+    overflow-y: auto; /* Adiciona scroll interno se necessário */
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); /* Sombra mais profunda */
+    width: 95%; /* Largura base para mobile */
+    max-width: 800px; /* Largura máxima para desktop */
+    height: auto; /* Altura automática baseada no conteúdo */
+    border-radius: 1rem; /* Bordas arredondadas */
+    border: 1px solid var(--menu-border);
+    position: relative;
+    /* Animação de entrada */
+    animation: modal-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-pop {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Remove a ocultação visual anterior que vinha do index.html se ainda persistir em cache */
+#creation-section.hidden, 
+#spell-creation-section.hidden, 
+#item-creation-section.hidden, 
+#attack-creation-section.hidden {
+    display: none;
+}
+
+
+.relationships-grid::-webkit-scrollbar {
+  display: none;
+}
+
+#spell-sheet-container, #item-sheet-container, #attack-sheet-container, #nested-sheet-container, #character-sheet-container
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
