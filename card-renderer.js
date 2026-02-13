@@ -800,7 +800,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
             // Define a altura mínima do statsDiv igual à do miniCardsDiv.
             // Se miniCards for maior, statsDiv cresce.
             // Se miniCards for menor, o min-height será pequeno e o statsDiv manterá seu tamanho natural (comportamento "não fazer nada").
-            statsDiv.style.minHeight = `${miniCardsHeight}px`;
+            statsDiv.style.minHeight = `${miniCardsHeight - 10}px`;
             // Opcional: Ajustar o alinhamento do conteúdo para ficar centralizado ou distribuído se esticar muito
             statsDiv.style.display = 'flex';
             statsDiv.style.flexDirection = 'column';
