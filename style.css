@@ -678,6 +678,12 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
     cursor: pointer;
 }
 
+.view-section
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .related-character-grid-item,
 .related-spell-grid-item,
 .related-attack-grid-item,
