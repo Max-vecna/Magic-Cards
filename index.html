@@ -418,17 +418,39 @@
                  </div>
 
                  <!-- Textareas Grid -->
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="md:col-span-2">
                         <label for="spellDescription" class="block text-xs font-semibold text-gray-400 mb-1">Descrição</label>
                         <textarea id="spellDescription" rows="3" class="w-full h-64 px-3 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 focus:border-teal-500 focus:outline-none"></textarea>
                     </div>
                     <div id="enhance-wrapper">
-                        <label for="spellEnhance" class="block text-xs font-semibold text-gray-400 mb-1">Aprimoramento</label>
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="spellEnhance" class="block text-xs font-semibold text-gray-400">Aprimoramento</label>
+                             <div class="relative group">
+                                <label for="spellEnhanceImageUpload" class="cursor-pointer text-xs text-teal-400 hover:text-teal-200"><i class="fas fa-image"></i> Add Img</label>
+                                <input type="file" id="spellEnhanceImageUpload" accept="image/*" class="hidden">
+                            </div>
+                        </div>
+                        <div id="spellEnhanceImagePreviewContainer" class="hidden mb-2 relative w-full h-64 bg-gray-800 rounded border border-gray-600 overflow-hidden group">
+                             <img id="spellEnhanceImagePreview" class="w-full h-full object-cover opacity-50">
+                             <button type="button" id="removeEnhanceImageBtn" class="absolute top-1 right-1 text-red-500 hover:text-white bg-black/50 hover:bg-red-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button>
+                             <span class="absolute bottom-1 left-2 text-[10px] text-white font-bold drop-shadow-md">Imagem selecionada</span>
+                        </div>
                         <textarea id="spellEnhance" rows="2" class="w-full h-64 px-3 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 focus:border-teal-500 focus:outline-none"></textarea>
                     </div>
                     <div id="true-wrapper">
-                        <label for="spellTrue" class="block text-xs font-semibold text-gray-400 mb-1">Verdadeiro</label>
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="spellTrue" class="block text-xs font-semibold text-gray-400">Verdadeiro</label>
+                            <div class="relative group">
+                                <label for="spellTrueImageUpload" class="cursor-pointer text-xs text-teal-400 hover:text-teal-200"><i class="fas fa-image"></i> Add Img</label>
+                                <input type="file" id="spellTrueImageUpload" accept="image/*" class="hidden">
+                            </div>
+                        </div>
+                        <div id="spellTrueImagePreviewContainer" class="hidden mb-2 relative w-full h-64 bg-gray-800 rounded border border-gray-600 overflow-hidden group">
+                             <img id="spellTrueImagePreview" class="w-full h-full object-cover opacity-50">
+                             <button type="button" id="removeTrueImageBtn" class="absolute top-1 right-1 text-red-500 hover:text-white bg-black/50 hover:bg-red-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button>
+                             <span class="absolute bottom-1 left-2 text-[10px] text-white font-bold drop-shadow-md">Imagem selecionada</span>
+                        </div>
                         <textarea id="spellTrue" rows="2" class="w-full h-64 px-3 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 focus:border-teal-500 focus:outline-none"></textarea>
                     </div>
                  </div>
@@ -436,7 +458,7 @@
                  <!-- Aumentos Compacto -->
                 <div class="bg-gray-800/30 p-2 rounded border border-gray-700/50">
                     <h3 class="text-xs font-bold text-teal-300 uppercase mb-2">Aumentos de Atributo</h3>
-                    <div class="flex flex-wrap gap-2 items-end mb-2">
+                    <div class="flex flex-wrap gap-2 items-end mb-2" style="justify-content: space-between;">
                          <div class="flex-grow min-w-[120px]">
                              <select id="spell-aumento-select" class="w-full px-2 py-1 bg-gray-800 text-white text-sm rounded border border-gray-600"></select>
                          </div>
@@ -525,7 +547,7 @@
                   <!-- Aumentos Compacto -->
                 <div class="bg-gray-800/30 p-2 rounded border border-gray-700/50">
                     <h3 class="text-xs font-bold text-amber-300 uppercase mb-2">Aumentos de Atributo</h3>
-                    <div class="flex flex-wrap gap-2 items-end mb-2">
+                    <div class="flex flex-wrap gap-2 items-end mb-2" style="justify-content: space-between;">
                          <div class="flex-grow min-w-[120px]">
                              <select id="item-aumento-select" class="w-full px-2 py-1 bg-gray-800 text-white text-sm rounded border border-gray-600"></select>
                          </div>

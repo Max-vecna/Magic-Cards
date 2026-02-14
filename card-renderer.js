@@ -1,4 +1,4 @@
-import { getData } from './local_db.js';
+import { getData, saveData } from './local_db.js';
 import { renderFullItemSheet } from './item_renderer.js';
 import { renderFullSpellSheet } from './magic_renderer.js';
 import { renderFullAttackSheet } from './attack_renderer.js';
@@ -127,6 +127,7 @@ export async function updateStatDisplay(sheetContainer, characterData) {
     });
 }
 
+// Substitua a função setupStatEditor inteira por esta:
 function setupStatEditor(characterData, container) {
     const sheetContainer = container || document.querySelector('#nested-sheet-container.visible') || document.querySelector('#character-sheet-container.visible');
     const modal = document.getElementById('stat-editor-modal');
@@ -153,6 +154,7 @@ function setupStatEditor(characterData, container) {
         currentStat = type;
         statMax = max;
         
+        // Garante dados frescos ao abrir
         const freshCharacterData = await getData('rpgCards', characterData.id);
         if (freshCharacterData) Object.assign(characterData, freshCharacterData);
 
@@ -203,6 +205,7 @@ function setupStatEditor(characterData, container) {
             characterData.dinheiro = Math.max(0, currentValue + amount);
         }
 
+        // Agora saveData está disponível graças à importação corrigida
         saveData('rpgCards', characterData).then(async () => {
              await updateStatDisplay(sheetContainer, characterData);
              closeModal();
@@ -212,10 +215,14 @@ function setupStatEditor(characterData, container) {
         });
     };
 
+    // --- CORREÇÃO DE CLONAGEM ---
+    // Substitui os botões antigos por clones limpos para remover event listeners acumulados
     const newAddBtn = addBtn.cloneNode(true);
     addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+    
     const newSubtractBtn = subtractBtn.cloneNode(true);
     subtractBtn.parentNode.replaceChild(newSubtractBtn, subtractBtn);
+    
     const newCloseBtn = closeBtn.cloneNode(true);
     closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
 
@@ -223,24 +230,24 @@ function setupStatEditor(characterData, container) {
     newSubtractBtn.addEventListener('click', () => updateStat(-Math.abs(parseInt(inputEl.value, 10) || 0)));
     newCloseBtn.addEventListener('click', closeModal);
 
-     modal.addEventListener('keydown', (e) => {
+    modal.onclick = (e) => {
+        if (e.target === modal) closeModal();
+    };
+    modal.onkeydown = (e) => {
         if (e.key === 'Escape') closeModal();
-    });
-     modal.addEventListener('click', (e) => {
-         if (e.target === modal) closeModal();
-     });
+    };
 
     sheetContainer.querySelectorAll('[data-action="edit-stat"]').forEach(el => {
         const newEl = el.cloneNode(true);
         el.parentNode.replaceChild(newEl, el);
-        newEl.addEventListener('click', async () => {
+        newEl.addEventListener('click', async (e) => {
+            e.stopPropagation();
             const type = newEl.dataset.statType;
             const max = newEl.dataset.statMax ? parseInt(newEl.dataset.statMax, 10) : Infinity;
             await openModal(type, max);
         });
     });
 }
-
 // Renderiza o inventário na ficha
 async function populateInventory(container, characterData, uniqueId) {
     const scrollArea = container.querySelector(`#inventory-magic-scroll-area-${uniqueId}`);
@@ -609,7 +616,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
             </div>
             
             <div class="absolute top-6 right-4 p-2 rounded-full text-center cursor-pointer flex flex-col items-center justify-center" >
-                <div style="position: relative;" data-action="edit-stat" data-stat-type="vida" data-stat-max="${permanentMaxVida}">
+                <div style="position: relative;" data-action="edit-stat" data-stat-type="vida" data-stat-max="${permanentMaxVida}" class="mb-2">
                     <i class="fa-solid fa-heart text-5xl" style="background:  linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
                     <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none" style="margin: auto;">
                         <span data-stat-current="vida">
@@ -622,7 +629,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                     </div>
                 </div>                
 
-                <div style="position: relative;" data-action="edit-stat" data-stat-type="mana" data-stat-max="${permanentMaxMana}">
+                <div style="position: relative;" data-action="edit-stat" data-stat-type="mana" data-stat-max="${permanentMaxMana}" class="mb-2">
                     <i class="fas fa-fire text-blue-500 text-5xl" style="background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
                     <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none" style="margin: auto;">
                         <span data-stat-current="mana">
@@ -635,7 +642,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                     </div>
                 </div>  
 
-                 <div class="money-container rounded-full p-2 flex items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="width: 42px; ${moneyContainerStyle} background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100});">
+                 <div class="money-container rounded-full p-2 flex mb-2 items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="width: 42px; ${moneyContainerStyle} background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100});">
                     💰$<span data-stat-current="dinheiro">${characterData.dinheiro || 0}</span>
                 </div>
             </div>
@@ -681,7 +688,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
             
             <div class="absolute bottom-0 w-full p-4">
                 <div class="pb-1 scrollable-content text-sm text-left ml-2 div-miniCards" style="display: flex; flex-direction: row; overflow-y: scroll;gap: 12px; scroll-snap-type: x mandatory; margin-left: 65px;">
-                    <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0.8;">
+                    <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0.6;">
                         <!-- RELATIONSHIPS_BAR -->
                     </div>
                     <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end;">
@@ -891,6 +898,4 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
         setupStatEditor(characterData, sheetContainer);
     }
     return finalHtml;
-
 }
-
