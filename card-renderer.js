@@ -128,19 +128,20 @@ export async function updateStatDisplay(sheetContainer, characterData) {
 }
 
 // Substitua a função setupStatEditor inteira por esta:
+// Substitua a função setupStatEditor inteira por esta versão robusta:
+
 function setupStatEditor(characterData, container) {
     const sheetContainer = container || document.querySelector('#nested-sheet-container.visible') || document.querySelector('#character-sheet-container.visible');
     const modal = document.getElementById('stat-editor-modal');
     if (!sheetContainer || !modal) return;
 
+    // Elementos do DOM do Modal Global
     const modalContent = modal.querySelector('#stat-editor-content');
     const titleTextEl = modal.querySelector('#stat-editor-title-text');
     const iconEl = modal.querySelector('#stat-editor-icon');
     const inputEl = modal.querySelector('#stat-editor-value');
-    const addBtn = modal.querySelector('#stat-editor-add-btn');
-    const subtractBtn = modal.querySelector('#stat-editor-subtract-btn');
-    const closeBtn = modal.querySelector('#stat-editor-close-btn');
-
+    
+    // Variáveis de estado locais para esta instância da ficha
     let currentStat = null;
     let statMax = Infinity;
 
@@ -150,11 +151,72 @@ function setupStatEditor(characterData, container) {
         dinheiro: { title: 'Dinheiro', icon: 'fa-coins', color: 'text-amber-400', border: 'border-amber-500' }
     };
 
+    const closeModal = () => {
+        modal.classList.remove('visible');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    };
+
+    // Função que configura os botões do modal para ESTE personagem especificamente
+    // Ela é chamada toda vez que abrimos o modal, para garantir que o modal "pertença" a esta ficha
+    const configureModalButtons = () => {
+        const addBtn = modal.querySelector('#stat-editor-add-btn');
+        const subtractBtn = modal.querySelector('#stat-editor-subtract-btn');
+        const closeBtn = modal.querySelector('#stat-editor-close-btn');
+
+        // Clona para remover listeners antigos (de outros personagens ou instancias anteriores)
+        const newAddBtn = addBtn.cloneNode(true);
+        const newSubtractBtn = subtractBtn.cloneNode(true);
+        const newCloseBtn = closeBtn.cloneNode(true);
+
+        addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+        subtractBtn.parentNode.replaceChild(newSubtractBtn, subtractBtn);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+
+        // Lógica de Atualização (Closure capturando o characterData correto)
+        const updateStat = (amount) => {
+            if (!currentStat || isNaN(amount) || amount === 0) {
+                if (amount === 0) closeModal();
+                return;
+            }
+
+            if (currentStat === 'vida' || currentStat === 'mana') {
+                let statCurrent = currentStat === 'vida' ? 'vidaAtual' : 'manaAtual';
+                let currentValue = characterData.attributes[statCurrent];
+
+                if (amount < 0) {
+                    let remainingDamage = Math.abs(amount);
+                    currentValue = Math.max(0, currentValue - remainingDamage);
+                    characterData.attributes[statCurrent] = currentValue;
+                } else {
+                    let newValue = Math.min(statMax, currentValue + amount);
+                    characterData.attributes[statCurrent] = newValue;
+                }
+
+            } else if (currentStat === 'dinheiro') {
+                let currentValue = characterData.dinheiro || 0;
+                characterData.dinheiro = Math.max(0, currentValue + amount);
+            }
+
+            saveData('rpgCards', characterData).then(async () => {
+                await updateStatDisplay(sheetContainer, characterData);
+                closeModal();
+            }).catch(err => {
+                console.error("Failed to save character data:", err);
+                closeModal();
+            });
+        };
+
+        // Adiciona os eventos nos botões recém-limpos
+        newAddBtn.addEventListener('click', () => updateStat(Math.abs(parseInt(inputEl.value, 10) || 0)));
+        newSubtractBtn.addEventListener('click', () => updateStat(-Math.abs(parseInt(inputEl.value, 10) || 0)));
+        newCloseBtn.addEventListener('click', closeModal);
+    };
+
     const openModal = async (type, max) => {
         currentStat = type;
         statMax = max;
         
-        // Garante dados frescos ao abrir
+        // Garante dados frescos
         const freshCharacterData = await getData('rpgCards', characterData.id);
         if (freshCharacterData) Object.assign(characterData, freshCharacterData);
 
@@ -176,78 +238,37 @@ function setupStatEditor(characterData, container) {
         setTimeout(() => modal.classList.add('visible'), 10);
     };
 
-    const closeModal = () => {
-        modal.classList.remove('visible');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    };
+    // Configuração dos gatilhos na ficha (Ícones de Vida/Mana/Dinheiro)
+    sheetContainer.querySelectorAll('[data-action="edit-stat"]').forEach(el => {
+        // Limpa listeners antigos do ícone
+        const newEl = el.cloneNode(true);
+        el.parentNode.replaceChild(newEl, el);
+        
+        newEl.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const type = newEl.dataset.statType;
+            const max = newEl.dataset.statMax ? parseInt(newEl.dataset.statMax, 10) : Infinity;
+            
+            // --- PASSO CRÍTICO: Reconfigura os botões do modal AGORA ---
+            // Isso garante que os botões "Add/Subtract" obedeçam a ESTA ficha, 
+            // não importa quantos minicards foram abertos antes.
+            configureModalButtons(); 
+            // -----------------------------------------------------------
 
-    const updateStat = (amount) => {
-        if (!currentStat || isNaN(amount) || amount === 0) {
-            if (amount === 0) closeModal();
-            return;
-        }
-
-        if (currentStat === 'vida' || currentStat === 'mana') {
-            let statCurrent = currentStat === 'vida' ? 'vidaAtual' : 'manaAtual';
-            let currentValue = characterData.attributes[statCurrent];
-
-            if (amount < 0) {
-                let remainingDamage = Math.abs(amount);
-                currentValue = Math.max(0, currentValue - remainingDamage);
-                characterData.attributes[statCurrent] = currentValue;
-            } else {
-                let newValue = Math.min(statMax, currentValue + amount);
-                characterData.attributes[statCurrent] = newValue;
-            }
-
-        } else if (currentStat === 'dinheiro') {
-            let currentValue = characterData.dinheiro || 0;
-            characterData.dinheiro = Math.max(0, currentValue + amount);
-        }
-
-        // Agora saveData está disponível graças à importação corrigida
-        saveData('rpgCards', characterData).then(async () => {
-             await updateStatDisplay(sheetContainer, characterData);
-             closeModal();
-        }).catch(err => {
-            console.error("Failed to save character data:", err);
-            closeModal();
+            await openModal(type, max);
         });
-    };
+    });
 
-    // --- CORREÇÃO DE CLONAGEM ---
-    // Substitui os botões antigos por clones limpos para remover event listeners acumulados
-    const newAddBtn = addBtn.cloneNode(true);
-    addBtn.parentNode.replaceChild(newAddBtn, addBtn);
-    
-    const newSubtractBtn = subtractBtn.cloneNode(true);
-    subtractBtn.parentNode.replaceChild(newSubtractBtn, subtractBtn);
-    
-    const newCloseBtn = closeBtn.cloneNode(true);
-    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-
-    newAddBtn.addEventListener('click', () => updateStat(Math.abs(parseInt(inputEl.value, 10) || 0)));
-    newSubtractBtn.addEventListener('click', () => updateStat(-Math.abs(parseInt(inputEl.value, 10) || 0)));
-    newCloseBtn.addEventListener('click', closeModal);
-
+    // Listeners globais do modal (Fundo e ESC)
+    // Apenas definimos o onclick direto para evitar acúmulo de listeners globais
     modal.onclick = (e) => {
         if (e.target === modal) closeModal();
     };
     modal.onkeydown = (e) => {
         if (e.key === 'Escape') closeModal();
     };
-
-    sheetContainer.querySelectorAll('[data-action="edit-stat"]').forEach(el => {
-        const newEl = el.cloneNode(true);
-        el.parentNode.replaceChild(newEl, el);
-        newEl.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const type = newEl.dataset.statType;
-            const max = newEl.dataset.statMax ? parseInt(newEl.dataset.statMax, 10) : Infinity;
-            await openModal(type, max);
-        });
-    });
 }
+
 // Renderiza o inventário na ficha
 async function populateInventory(container, characterData, uniqueId) {
     const scrollArea = container.querySelector(`#inventory-magic-scroll-area-${uniqueId}`);
