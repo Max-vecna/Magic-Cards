@@ -707,7 +707,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                 </div>
             </div>
             
-            <div class="absolute bottom-0 w-full p-4">
+            <div class="absolute bottom-0 w-full p-4" style="display: ${(isModal || isInPlay) ? 'flex' : 'none'}">
                 <div class="pb-1 scrollable-content text-sm text-left ml-2 div-miniCards" style="display: flex; flex-direction: row; overflow-y: scroll;gap: 12px; scroll-snap-type: x mandatory; margin-left: 65px;">
                     <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0.6;">
                         <!-- RELATIONSHIPS_BAR -->
