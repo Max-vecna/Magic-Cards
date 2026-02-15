@@ -255,7 +255,6 @@ export async function loadFromDrive(signal = null, onProgress = () => {}) {
          return null;
     }
 
-    showSync();
     onProgress(0);
 
     try {
@@ -325,9 +324,7 @@ export async function loadFromDrive(signal = null, onProgress = () => {}) {
         console.error('Erro ao baixar do Drive:', err);
         showTopAlert(err.message === "Sessão expirada" ? "Sessão expirada. Faça login novamente." : 'Erro ao baixar dados do Drive.', 4000, 'error');
         return null;
-    } finally {
-        hideSync();
-    }
+    } 
 }
 
 // Salva (Upload/Update) no Drive (Público/Exportado para ser chamado manualmente)
@@ -342,7 +339,6 @@ export async function saveToDrive(dataJSON, signal = null, onProgress = () => {}
          return;
     }
 
-    showSync(); 
     console.log("Iniciando upload manual para o Google Drive...");
     onProgress(5); // Inicio
 
@@ -415,9 +411,7 @@ export async function saveToDrive(dataJSON, signal = null, onProgress = () => {}
         }
         console.error('Erro ao salvar no Drive:', err);
         showTopAlert(err.message === "Sessão expirada" ? "Sessão expirada. Faça login novamente." : 'Falha ao salvar no Drive.', 4000, 'error');
-    } finally {
-        hideSync(); // Esconde ícone visual ao terminar
-    }
+    } 
 }
 
 // Configuração dos Botões de Login
