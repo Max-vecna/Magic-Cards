@@ -63,7 +63,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
         };
         
         aumentosHtml = `
-            <div class="pt-2 scroll-section cursor-pointer hover:bg-white/10 rounded p-1 transition-colors" data-bg-type="main">
+            <div class="pt-2 scroll-section" data-bg-type="main">
                 <h3 class="text-sm font-semibold flex items-center gap-2">Aumentos</h3>
                 <div class="text-gray-300 text-xs leading-relaxed mt-1 pl-6 space-y-1">
                     ${createList(aumentosFixos, 'Bônus Fixos', 'text-green-300')}
@@ -98,7 +98,6 @@ export async function renderFullSpellSheet(spellData, isModal) {
     const enhanceDataAttr = enhanceImageUrl ? `data-bg-image="${enhanceImageUrl}"` : '';
     const trueDataAttr = trueImageUrl ? `data-bg-image="${trueImageUrl}"` : '';
 
-    // Adicionado cursor-pointer e hover effects para indicar interatividade
     const sheetHtml = `
         <button id="close-spell-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-50 thumb-btn" style="display:${isModal? "block": "none"};"><i class="fa-solid fa-xmark"></i></button>
         <div id="spell-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white transition-all duration-500" style="${origin}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto; box-shadow: 0 0 20px ${predominantColor.color100}; background-color: #1a1a1a;">        
@@ -121,11 +120,11 @@ export async function renderFullSpellSheet(spellData, isModal) {
             <div class="mt-auto p-6 pt-3 md:p-6 w-full text-left absolute bottom-0 line-bottom z-20" style="background-color: ${predominantColor.color30}; --minha-cor: ${predominantColor.color100};">                
                 <div class="sheet-card-text-panel">                      
                     <div id="spell-scroll-container-${uniqueId}" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar" style="max-height: 12rem; height: 12rem">
-                        ${spellData.description ? `<div class="scroll-section cursor-pointer hover:bg-white/10 rounded p-1 transition-colors" data-bg-type="main" title="Clique para ver a imagem principal"><h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.description}</p></div>` : ''}
+                        ${spellData.description ? `<div class="scroll-section" data-bg-type="main"><h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.description}</p></div>` : ''}
                         
-                        ${(spellData.enhance && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section cursor-pointer hover:bg-white/10 rounded p-1 transition-colors" data-bg-type="enhance" ${enhanceDataAttr} title="Clique para ver a imagem de aprimoramento"><h3 class="text-sm font-semibold flex items-center gap-2">Aprimorar</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.enhance}</p></div>` : ''}
+                        ${(spellData.enhance && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="enhance" ${enhanceDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Aprimorar</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.enhance}</p></div>` : ''}
                         
-                        ${(spellData.true && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section cursor-pointer hover:bg-white/10 rounded p-1 transition-colors" data-bg-type="true" ${trueDataAttr} title="Clique para ver a imagem verdadeira"><h3 class="text-sm font-semibold flex items-center gap-2">Verdadeiro</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.true}</p></div>` : ''}
+                        ${(spellData.true && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="true" ${trueDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Verdadeiro</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.true}</p></div>` : ''}
                         
                         ${aumentosHtml}
                     </div>
@@ -143,7 +142,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
     sheetContainer.style.backgroundSize = 'cover';
     sheetContainer.style.backgroundPosition = 'center';
     
-    // Animação de entrada do Modal (Fade)
+    // Animação de entrada do Modal (Fade) - Mantida conforme pedido anterior
     sheetContainer.style.transition = 'opacity 0.4s ease-out';
     sheetContainer.style.opacity = '0';
 
@@ -154,7 +153,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
         sheetContainer.style.opacity = '1';
     }, 10);
 
-    // --- LÓGICA DE CLIQUE PARA TROCA DE IMAGEM COM FADE ---
+    // --- LÓGICA DE SCROLL PARA TROCA DE IMAGEM COM FADE ---
     setTimeout(() => {
         const scrollContainer = document.getElementById(`spell-scroll-container-${uniqueId}`);
         const bg1 = document.getElementById(`spell-bg-1-${uniqueId}`);
@@ -164,10 +163,31 @@ export async function renderFullSpellSheet(spellData, isModal) {
         let activeLayer = 1; // 1 ou 2
 
         if (scrollContainer && bg1 && bg2) {
-            const sections = scrollContainer.querySelectorAll('.scroll-section');
+            scrollContainer.addEventListener('scroll', () => {
+                const sections = scrollContainer.querySelectorAll('.scroll-section');
+                const containerRect = scrollContainer.getBoundingClientRect();
+                const triggerPoint = containerRect.top + (containerRect.height / 3);
 
-            const changeBackground = (targetImage) => {
-                 if (targetImage && targetImage !== currentBgUrl) {
+                let activeSection = null;
+
+                sections.forEach(section => {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= triggerPoint && rect.bottom >= triggerPoint) {
+                        activeSection = section;
+                    }
+                });
+
+                if (activeSection) {
+                    const bgType = activeSection.dataset.bgType;
+                    const sectionImage = activeSection.dataset.bgImage;
+                    
+                    let targetImage = mainImageUrl;
+                    if ((bgType === 'enhance' || bgType === 'true') && sectionImage) {
+                        targetImage = sectionImage;
+                    }
+
+                    // Se a imagem alvo for diferente da atual, faz o cross-fade
+                    if (targetImage !== currentBgUrl) {
                         currentBgUrl = targetImage;
                         
                         if (activeLayer === 1) {
@@ -184,20 +204,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
                             activeLayer = 1;
                         }
                     }
-            };
-
-            sections.forEach(section => {
-                section.addEventListener('click', () => {
-                    const bgType = section.dataset.bgType;
-                    const sectionImage = section.dataset.bgImage;
-                    
-                    let targetImage = mainImageUrl;
-                    if ((bgType === 'enhance' || bgType === 'true') && sectionImage) {
-                        targetImage = sectionImage;
-                    }
-                    
-                    changeBackground(targetImage);
-                });
+                }
             });
         }
     }, 200);

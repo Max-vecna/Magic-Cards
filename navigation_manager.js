@@ -5,7 +5,7 @@ import { saveAttackCard, editAttack, removeAttack, exportAttack, importAttack } 
 import { renderCategoryScreen, populateCategorySelect } from './category_manager.js';
 import { renderGrimoireScreen } from './grimoire_manager.js';
 import { renderFullAttackSheet } from './attack_renderer.js';
-import { openDatabase, removeData, getData, saveData, exportDatabase, importDatabase, exportImagesAsPng, showProgressModal, hideProgressModal, updateProgress } from './local_db.js';
+import { openDatabase, removeData, getData, saveData, exportDatabase, importDatabase, exportImagesAsPng, showProgressModal, hideProgressModal, updateProgress, manualSaveToDrive, manualLoadFromDrive } from './local_db.js';
 import { renderFullCharacterSheet } from './card-renderer.js';
 import { renderFullSpellSheet } from './magic_renderer.js';
 import { renderFullItemSheet } from './item_renderer.js';
@@ -13,20 +13,20 @@ import { showCustomAlert, showCustomConfirm } from './ui_utils.js';
 import { bufferToBlob } from './ui_utils.js';
 
 let renderContent;
-const viewCache = {}; // Cache para armazenar o estado das views (opcional, mas mantido para lógica interna)
+const viewCache = {};
 let contentDisplay;
 let mainContainer;
 
 export function isCombatActive() {
-    return false; // Modo de combate desativado/simplificado
+    return false;
 }
 
+// ... (renderCharacterInGame function remains unchanged) ...
 async function renderCharacterInGame(container) {
     const allCharacters = await getData('rpgCards');
     const characterInPlay = allCharacters.find(char => char.inPlay);
 
     container.innerHTML = '';
-    // Ajustes específicos de estilo para esta view
     contentDisplay.style.background = '';
     contentDisplay.style.boxShadow = '';
     if (mainContainer) mainContainer.style.overflowY = 'hidden';
@@ -47,8 +47,8 @@ async function renderCharacterInGame(container) {
     }
 }
 
+// ... (applyThumbnailScaling function remains unchanged) ...
 function applyThumbnailScaling(container) {
-    // Pequeno delay para garantir que o elemento não esteja mais com display:none antes de calcular tamanhos
     requestAnimationFrame(() => {
         container.querySelectorAll('.rpg-thumbnail').forEach(thumbnail => {
             const innerSheet = thumbnail.querySelector('.miniCard > div[style*="width"]');
@@ -59,8 +59,6 @@ function applyThumbnailScaling(container) {
                 if (sheetWidth > 0 && sheetHeight > 0) {
                     thumbnail.style.aspectRatio = `${sheetWidth} / ${sheetHeight}`;
                     const thumbWidth = thumbnail.offsetWidth;
-                    // Se o offsetWidth for 0 (elemento oculto), o cálculo falha.
-                    // Mas como chamamos isso após remover o hidden, deve funcionar.
                     if (thumbWidth > 0) {
                         const thumbHeight = thumbnail.offsetHeight || (thumbWidth * (sheetHeight / sheetWidth));
                         const scaleX = thumbWidth > 0 ? thumbWidth / sheetWidth : 1;
@@ -76,8 +74,6 @@ function applyThumbnailScaling(container) {
 
         const thumbnails = container.querySelectorAll('.rpg-thumbnail');
         thumbnails.forEach((cardWrapper, index) => {
-            // Removemos a animação de entrada repetitiva para itens cacheados para evitar "piscar"
-            // ou mantemos apenas se for a primeira renderização.
             if (!cardWrapper.classList.contains('visible')) {
                 setTimeout(() => cardWrapper.classList.add('visible'), index * 50);
             }
@@ -85,7 +81,9 @@ function applyThumbnailScaling(container) {
     });
 }
 
+// ... (openCharacterSelectionForRelationship and openSelectionModal remain unchanged) ...
 export async function openCharacterSelectionForRelationship() {
+    // ... [código original mantido] ...
     const selectCharacterModal = document.getElementById('select-character-modal');
     const selectCharacterList = document.getElementById('select-character-list');
     const modalTitleEl = selectCharacterModal.querySelector('h3');
@@ -146,6 +144,7 @@ export async function openCharacterSelectionForRelationship() {
 }
 
 export async function openSelectionModal(type) {
+    // ... [código original mantido] ...
     const selectionModal = document.getElementById('selection-modal');
     const selectionModalTitle = document.getElementById('selection-modal-title');
     const selectionModalList = document.getElementById('selection-modal-list');
@@ -308,6 +307,7 @@ export async function openSelectionModal(type) {
     }
 }
 
+// ... (createItemGrid, renderGroupedList, renderCharacterList, renderSpellList, renderItemList, renderAttackList remain unchanged) ...
 async function createItemGrid(items, type, renderSheetFunction) {
     const gridContainer = document.createElement('div');
     gridContainer.className = 'grid gap-4 w-full justify-items-center grid-cols-3 md:grid-cols-4 lg:grid-cols-5';
@@ -623,6 +623,7 @@ async function renderAttackList(container) {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // ... [Styles and DOM element selection remain the same] ...
     const style = document.createElement('style');
     style.innerHTML = `
         .rpg-thumbnail { opacity: 0; transform: translateY(20px) scale(0.95); transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease-in-out; will-change: transform, opacity; }
@@ -676,6 +677,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const exportDbBtnMobile = document.getElementById('export-db-btn-mobile');
     const exportImagesBtn = document.getElementById('export-images-btn');
     const exportImagesBtnMobile = document.getElementById('export-images-btn-mobile');
+    
+    // Novos botões do Drive Manual
+    const driveUploadBtn = document.getElementById('drive-upload-btn');
+    const driveDownloadBtn = document.getElementById('drive-download-btn');
+    const driveUploadBtnMobile = document.getElementById('drive-upload-btn-mobile');
+    const driveDownloadBtnMobile = document.getElementById('drive-download-btn-mobile');
 
     renderContent = async (target, force = false) => {
         contentDisplay.classList.remove('justify-center');
@@ -974,12 +981,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // Event Listeners para botões locais
     exportDbBtn.addEventListener('click', exportHandler);
     importDbBtn.addEventListener('click', importHandler);
     exportDbBtnMobile.addEventListener('click', exportHandler);
     importDbBtnMobile.addEventListener('click', importHandler);
     if (exportImagesBtn) exportImagesBtn.addEventListener('click', exportImagesHandler);
     if (exportImagesBtnMobile) exportImagesBtnMobile.addEventListener('click', exportImagesHandler);
+
+    // Event Listeners para botões do Google Drive Manual
+    if(driveUploadBtn) driveUploadBtn.addEventListener('click', manualSaveToDrive);
+    if(driveDownloadBtn) driveDownloadBtn.addEventListener('click', manualLoadFromDrive);
+    if(driveUploadBtnMobile) driveUploadBtnMobile.addEventListener('click', manualSaveToDrive);
+    if(driveDownloadBtnMobile) driveDownloadBtnMobile.addEventListener('click', manualLoadFromDrive);
 
 
     importDbInput.addEventListener('change', async (e) => {
