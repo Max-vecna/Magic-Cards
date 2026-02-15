@@ -49,7 +49,7 @@ function createProgressModal() {
     modal.id = 'progress-modal';
     modal.className = 'hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[999]';
     modal.innerHTML = `
-        <div class="bg-gray-900 border-2 border-indigo-800/50 text-white rounded-2xl shadow-2xl w-full max-w-sm text-center p-6 relative">
+        <div class="bg-gray-900 border-2 border-indigo-800/50 text-white rounded-2xl shadow-2xl w-64 max-w-sm text-center p-6 relative">
             <div class="loading-dice text-4xl mb-3 text-indigo-400"><i class="fas fa-dice-d20 fa-spin"></i></div>
             <h3 id="progress-title" class="text-lg font-bold text-indigo-300 mb-1">Processando...</h3>
             <p id="progress-message" class="text-gray-400 text-sm mb-4">Aguarde...</p>
@@ -64,7 +64,7 @@ function createProgressModal() {
             </div>
 
             <!-- Botão de Abortar -->
-            <button id="abort-progress-btn" class="mt-4 text-xs text-red-400 hover:text-red-300 underline hidden">Cancelar Operação</button>
+            <button id="abort-progress-btn" class="mt-4 text-xs text-red-400 hover:text-red-300 hidden">Cancelar Operação</button>
         </div>
     `;
     document.body.appendChild(modal);
@@ -313,6 +313,7 @@ export async function manualLoadFromDrive() {
         };
         window.addEventListener('offline', offlineHandler);
 
+        let success = false;
         try {
             updateProgress("Conectando...", 5);
             
@@ -328,9 +329,14 @@ export async function manualLoadFromDrive() {
                 updateProgress("Restaurando banco de dados...", 98);
                 await restoreDataFromJSON(cloudData);
                 
-                updateProgress("Concluído!", 100);
-                showTopAlert('Dados carregados da Nuvem com sucesso!', 4000, 'success');
-                document.dispatchEvent(new CustomEvent('dataChanged', { detail: { type: 'personagem' } })); 
+                success = true;
+                updateProgress("Concluído! Recarregando...", 100);
+                showTopAlert('Dados carregados! O site será recarregado.', 2000, 'success');
+                
+                // Recarrega a página após 1.5 segundos
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
             }
         } catch (e) {
             if (e.name === 'AbortError' || e.message === 'Aborted') {
@@ -341,8 +347,12 @@ export async function manualLoadFromDrive() {
             }
         } finally {
             window.removeEventListener('offline', offlineHandler);
-            if (!signal.aborted) setTimeout(hideProgressModal, 800);
-            else hideProgressModal();
+            
+            // Só esconde o modal se NÃO for recarregar a página (se deu erro ou abortou)
+            if (!success) {
+                if (!signal.aborted) setTimeout(hideProgressModal, 800);
+                else hideProgressModal();
+            }
         }
     }
 }
