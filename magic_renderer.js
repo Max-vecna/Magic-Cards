@@ -98,6 +98,17 @@ export async function renderFullSpellSheet(spellData, isModal) {
     const enhanceDataAttr = enhanceImageUrl ? `data-bg-image="${enhanceImageUrl}"` : '';
     const trueDataAttr = trueImageUrl ? `data-bg-image="${trueImageUrl}"` : '';
 
+    // Novas informações de Acerto e Dano
+    let extraStatsHtml = '';
+    if (spellData.acerto || spellData.dano) {
+        extraStatsHtml = `
+            <div class="flex gap-4 mt-2 mb-2 text-sm text-center absolute w-full" style="top: -45px; justify-content: space-between; margin: 0px 11px; width: calc(100% - 22px);">
+                ${spellData.acerto ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-teal-300">${spellData.acerto}</span> </div>` : ''}
+                ${spellData.dano ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-red-300">${spellData.dano}</span> </div>` : ''}
+            </div>
+        `;
+    }
+
     const sheetHtml = `
         <button id="close-spell-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-50 thumb-btn" style="display:${isModal? "block": "none"};"><i class="fa-solid fa-xmark"></i></button>
         <div id="spell-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white transition-all duration-500" style="${origin}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto; box-shadow: 0 0 20px ${predominantColor.color100}; background-color: #1a1a1a;">        
@@ -115,11 +126,12 @@ export async function renderFullSpellSheet(spellData, isModal) {
                 <h3 class="font-bold tracking-tight text-white" style="font-size: 1.3rem">${spellData.name}</h3>
                 ${topBarHtml}
             </div>
-           <div class="circle-container z-20"><div class="circle"><div class="icon">🎯</div></div></div>
-            
-            <div class="mt-auto p-6 pt-3 md:p-6 w-full text-left absolute bottom-0 line-bottom z-20" style="background-color: ${predominantColor.color30}; --minha-cor: ${predominantColor.color100};">                
-                <div class="sheet-card-text-panel">                      
+             
+            <div class="mt-auto  w-full text-left absolute bottom-0 z-20">  
+                   ${extraStatsHtml}           
+                <div class="p-6 pt-3 md:p-6 sheet-card-text-panel line-bottom" style="background-color: ${predominantColor.color30}; --minha-cor: ${predominantColor.color100};">                      
                     <div id="spell-scroll-container-${uniqueId}" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar" style="max-height: 12rem; height: 12rem">
+                       
                         ${spellData.description ? `<div class="scroll-section" data-bg-type="main"><h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.description}</p></div>` : ''}
                         
                         ${(spellData.enhance && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="enhance" ${enhanceDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Aprimorar</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.enhance}</p></div>` : ''}

@@ -204,6 +204,10 @@ export async function saveSpellCard(spellForm, type) {
     const spellTrueInput = document.getElementById('spellTrue');
     const spellCharacterOwnerInput = document.getElementById('spellCharacterOwner');
     const spellCategorySelect = document.getElementById('spell-category-select');
+    
+    // Novos campos
+    const spellAcertoInput = document.getElementById('spellAcerto');
+    const spellDamageInput = document.getElementById('spellDamage');
 
     const aumentosList = document.getElementById('spell-aumentos-list');
     const aumentos = [];
@@ -251,6 +255,9 @@ export async function saveSpellCard(spellForm, type) {
         image: imageBuffer,
         imageMimeType: imageMimeType,
         // Novos campos
+        acerto: spellAcertoInput.value,
+        dano: spellDamageInput.value,
+        
         enhanceImage: enhanceImageBuffer,
         enhanceImageMimeType: enhanceImageMimeType,
         trueImage: trueImageBuffer,
@@ -302,6 +309,10 @@ export async function editSpell(spellId) {
     document.getElementById('spellDescription').value = spellData.description;
     document.getElementById('spellEnhance').value = spellData.enhance;
     document.getElementById('spellTrue').value = spellData.true;
+    
+    // Novos campos
+    document.getElementById('spellAcerto').value = spellData.acerto || '';
+    document.getElementById('spellDamage').value = spellData.dano || '';
 
     await populateCharacterSelect('spellCharacterOwner');
     document.getElementById('spellCharacterOwner').value = spellData.characterId || '';

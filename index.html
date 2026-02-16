@@ -183,9 +183,6 @@
                 <button id="close-form-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
             </div>
             <form id="cardForm" class="space-y-3">
-                 <!-- ... campos do formulário ... -->
-                 <!-- (Mantendo o conteúdo original do form para brevidade, já que não mudou) -->
-                 <!-- Inserir aqui todo o conteúdo interno do creation-section do arquivo original -->
                  <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full md:w-1/5 flex flex-col gap-3">
                          <div class="text-center bg-gray-900/50 p-3 rounded-lg border border-gray-700">
@@ -244,15 +241,23 @@
                         </div>
                         <div class="bg-gray-800/50 p-2 rounded border border-gray-700/50">
                             <h3 class="text-xs font-bold text-red-400 uppercase mb-2">Combate</h3>
-                            <div class="grid grid-cols-4 md:grid-cols-8 gap-2">
+                            <!-- GRID ALTERADO PARA 5 COLUNAS PARA CABER ACERTO E DANO -->
+                            <div class="grid grid-cols-5 gap-2">
                                 <div><label class="block text-[10px] text-gray-500 text-center truncate">PV Máx</label><input type="number" id="vida" placeholder="0" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
                                 <div><label class="block text-[10px] text-gray-500 text-center truncate">PV Atual</label><input type="number" id="vidaAtual" placeholder="0" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
                                 <div><label class="block text-[10px] text-gray-500 text-center truncate">PM Máx</label><input type="number" id="mana" placeholder="0" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
                                 <div><label class="block text-[10px] text-gray-500 text-center truncate">PM Atual</label><input type="number" id="manaAtual" placeholder="0" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
+                                
+                                <!-- NOVOS CAMPOS INSERIDOS -->
+                                <div><label class="block text-[10px] text-gray-500 text-center truncate text-yellow-400">Acerto</label><input type="text" id="acerto" placeholder="+0" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
+                                
                                 <div><label class="block text-[10px] text-gray-500 text-center truncate">Armadura</label><input type="number" id="armadura" placeholder="0" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
                                 <div><label class="block text-[10px] text-gray-500 text-center truncate">Esquiva</label><input type="number" id="esquiva" placeholder="0" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
                                 <div><label class="block text-[10px] text-gray-500 text-center truncate">Bloqueio</label><input type="number" id="bloqueio" placeholder="0" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
                                 <div><label class="block text-[10px] text-gray-500 text-center truncate">Desloc.</label><input type="number" id="deslocamento" placeholder="0" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
+                                
+                                <!-- NOVOS CAMPOS INSERIDOS -->
+                                <div><label class="block text-[10px] text-gray-500 text-center truncate text-red-400">Dano</label><input type="text" id="dano" placeholder="1d4" class="w-full text-center px-1 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600"></div>
                             </div>
                         </div>
                     </div>
@@ -422,6 +427,15 @@
                                 <label for="spellResistencia" class="block text-[10px] text-gray-500 uppercase mb-1">Resistência</label>
                                 <input type="text" id="spellResistencia" placeholder="nenhuma" class="w-full px-2 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600">
                             </div>
+                            <!-- NOVOS CAMPOS: Acerto e Dano -->
+                            <div>
+                                <label for="spellAcerto" class="block text-[10px] text-gray-500 uppercase mb-1">Acerto</label>
+                                <input type="text" id="spellAcerto" placeholder="Ex: +5" class="w-full px-2 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600">
+                            </div>
+                            <div>
+                                <label for="spellDamage" class="block text-[10px] text-gray-500 uppercase mb-1">Dano</label>
+                                <input type="text" id="spellDamage" placeholder="Ex: 2d6" class="w-full px-2 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600">
+                            </div>
                         </div>
                     </div>
                  </div>
@@ -529,6 +543,11 @@
                                 <label for="itemDamage" class="block text-[10px] text-gray-500 uppercase mb-1">Dano</label>
                                 <input type="text" id="itemDamage" placeholder="1d8" class="w-full px-2 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600">
                             </div>
+                             <!-- NOVO CAMPO: Acerto (Dano já existia) -->
+                             <div>
+                                <label for="itemAcerto" class="block text-[10px] text-gray-500 uppercase mb-1">Acerto</label>
+                                <input type="text" id="itemAcerto" placeholder="+2" class="w-full px-2 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600">
+                            </div>
                              <div>
                                 <label for="itemCharge" class="block text-[10px] text-gray-500 uppercase mb-1">Carga</label>
                                 <input type="number" id="itemCharge" placeholder="1" class="w-full px-2 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600">
@@ -599,6 +618,17 @@
                         <div>
                             <label for="attackCharacterOwner" class="block text-xs font-semibold text-gray-400 mb-1">Personagem</label>
                             <select id="attackCharacterOwner" class="w-full px-3 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 focus:border-red-500 focus:outline-none"></select>
+                        </div>
+                        <!-- NOVOS CAMPOS: Acerto e Dano -->
+                        <div class="grid grid-cols-2 gap-3">
+                             <div>
+                                <label for="attackAcerto" class="block text-[10px] text-gray-500 uppercase mb-1">Acerto</label>
+                                <input type="text" id="attackAcerto" placeholder="+4" class="w-full px-2 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600">
+                            </div>
+                            <div>
+                                <label for="attackDamage" class="block text-[10px] text-gray-500 uppercase mb-1">Dano</label>
+                                <input type="text" id="attackDamage" placeholder="1d10+2" class="w-full px-2 py-1 bg-gray-700 text-white text-sm rounded border border-gray-600">
+                            </div>
                         </div>
                         <div>
                             <label for="attackDescription" class="block text-xs font-semibold text-gray-400 mb-1">Descrição</label>

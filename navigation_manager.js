@@ -197,6 +197,8 @@ export async function openSelectionModal(type) {
         const selectedIds = new Set();
         if (type === 'magic') {
             document.querySelectorAll('#selected-magics-container [data-id]').forEach(el => selectedIds.add(el.dataset.id));
+            // CORREÇÃO: Verificar também o container de habilidades
+            document.querySelectorAll('#selected-skills-container [data-id]').forEach(el => selectedIds.add(el.dataset.id));
         } else if (type === 'attack') {
             document.querySelectorAll('#selected-attacks-container [data-id]').forEach(el => selectedIds.add(el.dataset.id));
         } else if (type === 'relationship') {
@@ -928,7 +930,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('add-magic-to-char-btn').addEventListener('click', () => openSelectionModal('magic'));
+    // Botão de habilidade deve abrir modal de seleção do tipo magic, mas a filtragem visual ou lógica ocorre no navigation_manager
+    document.getElementById('add-skill-to-char-btn').addEventListener('click', () => openSelectionModal('magic')); 
     document.getElementById('add-attack-to-char-btn').addEventListener('click', () => openSelectionModal('attack'));
+    
     selectionModalCloseBtn.addEventListener('click', () => selectionModal.classList.add('hidden'));
     selectionModal.addEventListener('click', (e) => {
         if (e.target === selectionModal) {
