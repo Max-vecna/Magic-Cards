@@ -714,7 +714,9 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
 .relationships-grid.expanded .related-item-grid-item,
 .relationships-grid.expanded .related-skill-grid-item {
     margin-left: 4px;
-    margin-right: 2px;
+    margin-right: 2px;    
+    position: sticky;
+    left: 0;
 }
 
 .relationships-grid.expanded .related-character-grid-item:first-child,

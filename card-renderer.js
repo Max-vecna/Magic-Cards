@@ -541,7 +541,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     const attackStatsHtml = Object.entries(attackStats).map(([stat, label]) => {
         const baseValue = characterData.attributes[stat] || 0;
         const content = baseValue || '-';
-        const colorStyle = stat === 'acerto' ? 'color: #facc15;' : (stat === 'dano' ? 'color: #f87171;' : '');
+        const colorStyle = stat === 'acerto' ? 'color: #15fa61;' : (stat === 'dano' ? 'color: #bf3f3f;' : '');
         return `<div class="text-center font-bold text-sm" style="${stat === 'acerto' ? 'margin-bottom: 20px;' : ''}"><span style="${colorStyle}; writing-mode: vertical-rl; text-orientation: upright;">${content}</div>`;
     }).join('');
 
