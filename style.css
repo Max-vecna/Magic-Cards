@@ -696,7 +696,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
     position: relative;
     cursor: pointer;
     transition: margin 0.4s ease-in-out, transform 0.4s ease-in-out;
-    margin-left: -40.5px;
+    margin-left: -40px;
 }
 
 .related-character-grid-item:first-child,
@@ -1075,6 +1075,7 @@ body:not(.dark) .text-white { color: var(--text-color) !important; }
     }
 
 }
+
 
 
 
