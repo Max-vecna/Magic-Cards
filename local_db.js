@@ -107,7 +107,6 @@ async function createMiniCards()
        allCardsHtml += ` ${attackCardsHtml.join('')} </div> `;
     }
 
-    console.log("Grids gerados: ", allCardsHtml);
     return allCardsHtml;
 
 }
