@@ -12,12 +12,10 @@ export async function renderFullAttackSheet(attackData, isModal) {
     if(isModal)
     {  
         const index = document.getElementsByClassName('visible').length;
-        console.log('Z-Index for character sheet modal/in-play:', index);
         sheetContainer.style.zIndex = 100000000 + index;
     }
 
     const aspectRatio = isModal?  getAspectRatio() : 10/16;
-
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
@@ -38,20 +36,27 @@ export async function renderFullAttackSheet(attackData, isModal) {
         imageUrl = createdObjectUrl;
     }
     
-    // Usa a cor salva, com um fallback para cards antigos
     const predominantColor = attackData.predominantColor || { color30: 'rgba(153, 27, 27, 0.3)', color100: 'rgb(153, 27, 27)' };
-    
     const origin = isModal ? "" : "transform-origin: top left";
     const transformProp = isModal ? 'transform: scale(0.9);' : '';
     const uniqueId = `attack-${attackData.id}-${Date.now()}`;
 
-    // Exibição de Acerto e Dano
+    // Modificado para suportar Acerto/Dano Sem Mana em Ataques
     let statsHtml = '';
-    if (attackData.acerto || attackData.dano) {
+    const hasAnyStats = attackData.acerto || attackData.dano || attackData.acertoSemMana || attackData.danoSemMana;
+    if (hasAnyStats) {
         statsHtml = `
-           <div class="flex gap-4 mt-2 mb-2 text-sm text-center absolute w-full" style="top: -45px; justify-content: space-between; margin: 0px 11px; width: calc(100% - 22px);">
-                ${attackData.acerto ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-teal-300">${attackData.acerto}</span> </div>` : ''}
-                ${attackData.dano ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-red-300">${attackData.dano}</span> </div>` : ''}
+            <div class="flex flex-col gap-1 mt-2 mb-2 text-sm text-center absolute w-full" style="top: -75px; margin: 0px 11px; width: calc(100% - 22px);">
+                <!-- Linha Principal -->
+                <div class="flex justify-between w-full" style="margin-bottom: 5px;">
+                    ${attackData.acerto ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-teal-300">${attackData.acerto}</span> </div>` : '<div></div>'}
+                    ${attackData.dano ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-red-300">${attackData.dano}</span> </div>` : '<div></div>'}
+                </div>
+                <!-- Linha Sem Mana -->
+                <div class="flex justify-between w-full mt-4" style="font-size: 0.8em; margin-top: -5px;">
+                    ${attackData.acertoSemMana ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-teal-500">${attackData.acertoSemMana}</span> </div>` : '<div></div>'}
+                    ${attackData.danoSemMana ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-red-500">${attackData.danoSemMana}</span> </div>` : '<div></div>'}
+                </div>
             </div>
         `;
     }
@@ -81,9 +86,7 @@ export async function renderFullAttackSheet(attackData, isModal) {
         </div>       
     `;
 
-    if (!isModal) {
-        return sheetHtml;
-    }
+    if (!isModal) return sheetHtml;
 
     sheetContainer.innerHTML = sheetHtml;
     sheetContainer.style.backgroundImage = `url(icons/fundo.png)`;

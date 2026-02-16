@@ -32,7 +32,6 @@ export async function renderFullSpellSheet(spellData, isModal) {
         mainImageUrl = 'https://placehold.co/400x400/00796B/B2DFDB?text=Magia';
     }
 
-    // Preparar URLs das imagens extras (Enhance e True)
     let enhanceImageUrl = null;
     let createdEnhanceObjectUrl = null;
     if (spellData.enhanceImage) {
@@ -94,17 +93,25 @@ export async function renderFullSpellSheet(spellData, isModal) {
         ? `<p style="font-size: 10px;">${spellData.circle > 0 ? `${spellData.circle}º Círculo` : ''}${spellData.circle > 0 && spellData.manaCost > 0 ? ' - ' : ''}${spellData.manaCost > 0 ? `${spellData.manaCost} PM` : ''}</p>`
         : '';
 
-    // Lógica para definir atributos de dados para troca de imagem
     const enhanceDataAttr = enhanceImageUrl ? `data-bg-image="${enhanceImageUrl}"` : '';
     const trueDataAttr = trueImageUrl ? `data-bg-image="${trueImageUrl}"` : '';
 
-    // Novas informações de Acerto e Dano
+    // Modificado para suportar Acerto/Dano Sem Mana
     let extraStatsHtml = '';
-    if (spellData.acerto || spellData.dano) {
+    const hasAnyStats = spellData.acerto || spellData.dano || spellData.acertoSemMana || spellData.danoSemMana;
+    if (hasAnyStats) {
         extraStatsHtml = `
-            <div class="flex gap-4 mt-2 mb-2 text-sm text-center absolute w-full" style="top: -45px; justify-content: space-between; margin: 0px 11px; width: calc(100% - 22px);">
-                ${spellData.acerto ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-teal-300">${spellData.acerto}</span> </div>` : ''}
-                ${spellData.dano ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-red-300">${spellData.dano}</span> </div>` : ''}
+            <div class="flex flex-col gap-1 mt-2 mb-2 text-sm text-center absolute w-full" style="top: -75px; margin: 0px 11px; width: calc(100% - 22px);">
+                <!-- Linha Principal -->
+                <div class="flex justify-between w-full" style="margin-bottom: 5px;">
+                    ${spellData.acerto ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-teal-300">${spellData.acerto}</span> </div>` : '<div></div>'}
+                    ${spellData.dano ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-red-300">${spellData.dano}</span> </div>` : '<div></div>'}
+                </div>
+                <!-- Linha Sem Mana -->
+                <div class="flex justify-between w-full mt-4" style="font-size: 0.8em; margin-top: -5px;">
+                    ${spellData.acertoSemMana ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-teal-500">${spellData.acertoSemMana}</span> </div>` : '<div></div>'}
+                    ${spellData.danoSemMana ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-red-500">${spellData.danoSemMana}</span> </div>` : '<div></div>'}
+                </div>
             </div>
         `;
     }
@@ -113,11 +120,9 @@ export async function renderFullSpellSheet(spellData, isModal) {
         <button id="close-spell-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-50 thumb-btn" style="display:${isModal? "block": "none"};"><i class="fa-solid fa-xmark"></i></button>
         <div id="spell-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white transition-all duration-500" style="${origin}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto; box-shadow: 0 0 20px ${predominantColor.color100}; background-color: #1a1a1a;">        
             
-            <!-- Camadas de Fundo para Cross-fade -->
             <div id="spell-bg-1-${uniqueId}" class="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700 ease-in-out" style="background-image: url('${mainImageUrl}'); z-index: 0; opacity: 1;"></div>
             <div id="spell-bg-2-${uniqueId}" class="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700 ease-in-out" style="background-image: url('${mainImageUrl}'); z-index: 0; opacity: 0;"></div>
 
-            <!-- Overlay de Gradiente -->
             <div class="absolute inset-0 w-full h-full z-10" style="background: linear-gradient(-180deg, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); display: flex; align-items: center; justify-content: center; pointer-events: none;">
                 <div class="rounded-lg" style="width: 100%; height: calc(100% - 20px); border: 3px solid ${predominantColor.color100}; margin: 10px;"></div>
             </div>
@@ -149,15 +154,12 @@ export async function renderFullSpellSheet(spellData, isModal) {
     if (!isModal) return sheetHtml;
 
     sheetContainer.innerHTML = sheetHtml;
-    // Removemos a imagem de fundo do container principal pois agora o card tem camadas internas
     sheetContainer.style.backgroundImage = `url(icons/fundo.png)`;
     sheetContainer.style.backgroundSize = 'cover';
     sheetContainer.style.backgroundPosition = 'center';
     
-    // Animação de entrada do Modal (Fade) - Mantida conforme pedido anterior
     sheetContainer.style.transition = 'opacity 0.4s ease-out';
     sheetContainer.style.opacity = '0';
-
     sheetContainer.classList.remove('hidden');
     
     setTimeout(() => {
@@ -165,14 +167,13 @@ export async function renderFullSpellSheet(spellData, isModal) {
         sheetContainer.style.opacity = '1';
     }, 10);
 
-    // --- LÓGICA DE SCROLL PARA TROCA DE IMAGEM COM FADE ---
     setTimeout(() => {
         const scrollContainer = document.getElementById(`spell-scroll-container-${uniqueId}`);
         const bg1 = document.getElementById(`spell-bg-1-${uniqueId}`);
         const bg2 = document.getElementById(`spell-bg-2-${uniqueId}`);
         
-        let currentBgUrl = mainImageUrl; // Estado inicial
-        let activeLayer = 1; // 1 ou 2
+        let currentBgUrl = mainImageUrl;
+        let activeLayer = 1;
 
         if (scrollContainer && bg1 && bg2) {
             scrollContainer.addEventListener('scroll', () => {
@@ -181,7 +182,6 @@ export async function renderFullSpellSheet(spellData, isModal) {
                 const triggerPoint = containerRect.top + (containerRect.height / 3);
 
                 let activeSection = null;
-
                 sections.forEach(section => {
                     const rect = section.getBoundingClientRect();
                     if (rect.top <= triggerPoint && rect.bottom >= triggerPoint) {
@@ -198,18 +198,14 @@ export async function renderFullSpellSheet(spellData, isModal) {
                         targetImage = sectionImage;
                     }
 
-                    // Se a imagem alvo for diferente da atual, faz o cross-fade
                     if (targetImage !== currentBgUrl) {
                         currentBgUrl = targetImage;
-                        
                         if (activeLayer === 1) {
-                            // Transição para camada 2
                             bg2.style.backgroundImage = `url('${targetImage}')`;
                             bg2.style.opacity = '1';
                             bg1.style.opacity = '0';
                             activeLayer = 2;
                         } else {
-                            // Transição para camada 1
                             bg1.style.backgroundImage = `url('${targetImage}')`;
                             bg1.style.opacity = '1';
                             bg2.style.opacity = '0';
@@ -220,7 +216,6 @@ export async function renderFullSpellSheet(spellData, isModal) {
             });
         }
     }, 200);
-    // ---------------------------------------------
 
     const closeSheet = () => {
         sheetContainer.classList.remove('visible');

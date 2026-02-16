@@ -81,7 +81,7 @@ export async function updateStatDisplay(sheetContainer, characterData) {
     
     // --- ATUALIZADO: Separação de Stats ---
     // Definição das duas listas de stats para busca
-    const attackStats = { acerto: 'ATK', dano: 'DMG' };
+    const attackStats = { acerto: 'ATK', dano: 'DMG', acertoSemMana: 'ATK s/Mana', danoSemMana: 'DMG s/Mana' };
     const defenseStats = { armadura: 'CA', esquiva: 'ES', bloqueio: 'BL', deslocamento: 'DL' };
     
     // Busca elementos em AMBOS os containers (novo div-attack-stats e div-combat-stats existente)
@@ -528,13 +528,16 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     }
 
     // --- SEPARAÇÃO DOS STATS EM DOIS GRUPOS ---
-    const attackStats = { acerto: 'ATK', dano: 'DMG' };
+    const attackStats = { acerto: 'ATK', dano: 'DMG'};
+    const attackStatsSemMana = { acertoSemMana: 'ATK s/Mana', danoSemMana: 'DMG s/Mana' };
     const defenseStats = { armadura: 'CA', esquiva: 'ES', bloqueio: 'BL', deslocamento: 'DL' };
 
     const hasAcerto = characterData.attributes.acerto && String(characterData.attributes.acerto).trim() !== '';
     const hasDano = characterData.attributes.dano && String(characterData.attributes.dano).trim() !== '';
     const showAttackStats = hasAcerto || hasDano;
-
+    const hasAcertoSem = characterData.attributes.acertoSemMana && String(characterData.attributes.acertoSemMana).trim() !== '';
+    const hasDanoSem = characterData.attributes.danoSemMana && String(characterData.attributes.danoSemMana).trim() !== '';
+    const showAttackStatsSem = hasAcertoSem || hasDanoSem;
    
 
     // Gera HTML para Acerto e Dano (Novo Card)
@@ -543,6 +546,13 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
         const content = baseValue || '-';
         const colorStyle = stat === 'acerto' ? 'color: #15fa61;' : (stat === 'dano' ? 'color: #bf3f3f;' : '');
         return `<div class="text-center font-bold text-sm" style="${stat === 'acerto' ? 'margin-bottom: 20px;' : ''}"><span style="${colorStyle}; writing-mode: vertical-rl; text-orientation: upright;">${content}</div>`;
+    }).join('');
+
+    const attackSemManaStatsHtml = Object.entries(attackStatsSemMana).map(([stat, label]) => {
+        const baseValue = characterData.attributes[stat] || 0;
+        const content = baseValue || '-';
+        const colorStyle = stat === 'acertoSemMana' ? 'color: #15fa61;' : (stat === 'danoSemMana' ? 'color: #bf3f3f;' : '');
+        return `<div class="text-center font-bold text-sm" style="${stat === 'acertoSemMana' ? 'margin-bottom: 20px;' : ''}"><span style="${colorStyle}; writing-mode: vertical-rl; text-orientation: upright;">${content}</div>`;
     }).join('');
 
     // Gera HTML para Defesa (Card Existente)
@@ -691,7 +701,8 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                 <div class="rounded-lg" style="width: 96%; height: 96%; border: 3px solid ${predominantColor.colorLight};"></div>
             </div>
             
-            <div class="absolute top-6 right-4 p-2 rounded-full text-center cursor-pointer flex flex-col items-center justify-center" style="display: flex; justify-content: space-between; flex-direction: column; height: calc(100% - 40px);">
+            <div class="absolute top-6 right-4 p-2 rounded-full text-center cursor-pointer flex flex-col items-center justify-center" style="display: flex; justify-content: space-between; flex-direction: column; height: calc(100% - 40px);
+    align-items: flex-end;">
                 <div>    
                     <div style="position: relative;" data-action="edit-stat" data-stat-type="vida" data-stat-max="${permanentMaxVida}" class="mb-2">
                         <i class="fa-solid fa-heart text-5xl" style="background:  linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
@@ -724,8 +735,13 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                     </div>
                 </div>
                 <!-- 1. Attack Stats (New Separated Block) -->
-                <div class="div-attack-stats grid grid-row-2 gap-y-2 text-xs mb-2" style="display: ${showAttackStats ? 'block' : 'none'}; border-radius: 18px; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); padding: 8px; width: 42px; justify-content: center; align-content: space-around;">
-                    ${attackStatsHtml}
+                <div style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;">                    
+                    <div class="div-attack-stats grid grid-row-2 gap-y-2 text-xs mb-2" style="display: ${showAttackStatsSem ? 'block' : 'none'}; border-radius: 18px; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); padding: 8px; width: 42px; justify-content: center; align-content: space-around; ">
+                        ${attackSemManaStatsHtml}
+                    </div>
+                    <div class="div-attack-stats grid grid-row-2 gap-y-2 text-xs mb-2" style="display: ${showAttackStats ? 'block' : 'none'}; border-radius: 18px; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); padding: 8px; width: 42px; justify-content: center; align-content: space-around; border: 2px solid ${predominantColor.colorLight};">
+                        ${attackStatsHtml}
+                    </div>
                 </div>
             </div>
 

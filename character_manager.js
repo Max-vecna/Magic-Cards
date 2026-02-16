@@ -263,6 +263,8 @@ export async function saveCharacterCard(cardForm) {
     // NOVOS INPUTS
     const acertoInput = document.getElementById('acerto');
     const danoInput = document.getElementById('dano');
+    const acertoInputSemMana = document.getElementById('acertoSemMana');
+    const danoInputSemMana = document.getElementById('danoSemMana');
 
     const selectedPericias = [];
     document.querySelectorAll('#pericias-checkboxes-container input[type="checkbox"]:checked').forEach(cb => {
@@ -293,7 +295,9 @@ export async function saveCharacterCard(cardForm) {
         pericias: selectedPericias,
         // Salvando Acerto e Dano (String para permitir "+5" ou "1d8")
         acerto: acertoInput.value,
-        dano: danoInput.value
+        dano: danoInput.value,
+        acertoSemMana: acertoInputSemMana.value,
+        danoSemMana: danoInputSemMana.value
     };
     const lore = {
         historia: historiaInput.value,
@@ -404,6 +408,8 @@ export async function editCard(cardId) {
     // PREENCHE ACERTO E DANO
     document.getElementById('acerto').value = attrs.acerto || '';
     document.getElementById('dano').value = attrs.dano || '';
+    document.getElementById('acertoSemMana').value = attrs.acertoSemMana || '';
+    document.getElementById('danoSemMana').value = attrs.danoSemMana || '';
     
     document.getElementById('historia').value = cardData.lore?.historia || '';
     document.getElementById('personalidade').value = cardData.lore?.personalidade || '';
