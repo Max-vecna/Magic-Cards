@@ -693,116 +693,95 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     const moneyContainerStyle = hasMoney ? "writing-mode: vertical-rl; text-orientation: upright; top: 141px;" : "display: none;";
 
     const sheetHtml = `
-            <div class="absolute top-6 right-6 z-20 flex flex-col gap-2">
-                 <button id="close-sheet-btn-${uniqueId}" class="bg-red-600 hover:text-white thumb-btn" style="display: ${isModal ? 'flex' : 'none'}"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="character-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white" style="${origin}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; box-shadow: 0 0 20px ${predominantColor.colorLight}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto;">
-            <div class="w-full h-full" style="background: linear-gradient(to bottom, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); display: flex; align-items: center; justify-content: center;">
-                <div class="rounded-lg" style="width: 96%; height: 96%; border: 3px solid ${predominantColor.colorLight};"></div>
-            </div>
-            
-            <div class="absolute top-6 right-4 p-2 rounded-full text-center cursor-pointer flex flex-col items-center justify-center" style="display: flex; justify-content: space-between; flex-direction: column; height: calc(100% - 40px);
-    align-items: flex-end;">
-                <div>    
-                    <div style="position: relative;" data-action="edit-stat" data-stat-type="vida" data-stat-max="${permanentMaxVida}" class="mb-2">
-                        <i class="fa-solid fa-heart text-5xl" style="background:  linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none" style="margin: auto;">
-                            <span data-stat-current="vida">
-                                ${characterData.attributes.vidaAtual || 0}
-                            </span>
-                            <hr style="width: 15px;">
-                            <span data-stat-max-display="vida" style="bottom: 12px;">
-                                ${permanentMaxVida}
-                            </span>
+        <div class="absolute top-6 right-6 z-20 flex flex-col gap-2">
+                <button id="close-sheet-btn-${uniqueId}" class="bg-red-600 hover:text-white thumb-btn" style="display: ${isModal ? 'flex' : 'none'}"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="character-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white" style="${origin}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; box-shadow: 0 0 20px ${predominantColor.colorLight}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto;">
+            <div class="w-full h-full" style="background: linear-gradient(to bottom, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4);">
+                <div class="rounded-lg absolute inset-0" style="width: 94%; height: 96%; border: 3px solid ${predominantColor.colorLight}; margin: auto;">
+                    <div class="h-full w-12 left-2 absolute top-0 left-0 bottom-0">
+                        <div class="div-combat-stats grid grid-row-6 gap-y-2 text-xs absolute top-[-2px]" style="border-radius: 0  0 28px 0; background: linear-gradient(to top, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 10px; width: 42px; justify-content: space-evenly; ">
+                            <div class="text-center font-bold" style="color: rgb(0 247 85);">LV<br>${characterData.level || 0}</div>
+                            ${defenseStatsHtml}
+                            <div class="text-center">CD<br>${cdValue}</div>
                         </div>
-                    </div>                
 
-                    <div style="position: relative;" data-action="edit-stat" data-stat-type="mana" data-stat-max="${permanentMaxMana}" class="mb-2">
-                        <i class="fas fa-fire text-blue-500 text-5xl" style="background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none" style="margin: auto;">
-                            <span data-stat-current="mana">
-                                ${characterData.attributes.manaAtual || 0}
-                            </span>
-                            <hr style="width: 15px;">
-                            <span data-stat-max-display="mana" style="bottom: 12px;">
-                            ${permanentMaxMana}
-                            </span>
-                        </div>
-                    </div>  
-
-                    <div class="money-container rounded-full p-2 flex mb-2 items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="width: 42px; ${moneyContainerStyle} background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100});">
-                        💰$<span data-stat-current="dinheiro">${characterData.dinheiro || 0}</span>
-                    </div>
-                </div>
-                <!-- 1. Attack Stats (New Separated Block) -->
-                <div style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;">                    
-                    <div class="div-attack-stats grid grid-row-2 gap-y-2 text-xs mb-2" style="display: ${showAttackStatsSem ? 'block' : 'none'}; border-radius: 18px; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); padding: 8px; width: 42px; justify-content: center; align-content: space-around; ">
-                        ${attackSemManaStatsHtml}
-                    </div>
-                    <div class="div-attack-stats grid grid-row-2 gap-y-2 text-xs mb-2" style="display: ${showAttackStats ? 'block' : 'none'}; border-radius: 18px; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); padding: 8px; width: 42px; justify-content: center; align-content: space-around; border: 2px solid ${predominantColor.colorLight};">
-                        ${attackStatsHtml}
-                    </div>
-                </div>
-            </div>
-
-            <div id="lore-icon-${uniqueId}" class="absolute top-8 left-1/2 -translate-x-1/2 text-center z-10"  data-action="toggle-lore">
-                <h3 class="text-2xl font-bold">${characterData.title}</h3>
-                <p class="text-md italic text-gray-300">${characterData.subTitle}</p>
-            </div>
-            
-            <div class="absolute top-6 left-4 p-2 rounded-full text-center cursor-pointer" style="display: flex; justify-content: space-between; flex-direction: column; height: calc(100% - 30px);">
-                <!-- 2. Defense/Combat Stats (Renamed, Removed ATK/DMG) -->
-                <div class="div-combat-stats grid grid-row-6 gap-x-4 gap-y-2 text-xs mb-2" style="border-radius: 28px; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); padding: 10px; width: 42px; justify-content: space-evenly; ">
-                    <div class="text-center font-bold" style="color: rgb(0 247 85);">LV<br>${characterData.level || 0}</div>
-                    ${defenseStatsHtml}
-                    <div class="text-center">CD<br>${cdValue}</div>
-                </div>
-
-                <!-- 3. Attributes Stats (Existing) -->
-                <div class="grid grid-row-6 gap-x-4 gap-y-2 text-xs mb-4 div-Stats" style="border-radius: 28px; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.color100}); padding: 10px; width: 42px;">
-                    ${mainAttributes.map(key => {
-                    const baseValue = parseInt(characterData.attributes[key]) || 0;
-                    const fixedBonus = totalFixedBonuses[key] || 0;
-                    const fixedBonusHtml = fixedBonus !== 0 ? ` <span class="text-green-400 font-semibold">${fixedBonus > 0 ? '+' : ''}${fixedBonus}</span>` : '';
-                    return `                        
-                        <label class="text-center" title="${key}">${key.slice(0, 3).toUpperCase()}<br>${baseValue}${fixedBonusHtml}</label>                                                      
-                    `;
-                    }).join('')}
-                </div>
-            </div>
-
-            <div id="lore-modal-${uniqueId}" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300">
-                <div class="bg-gray-800 p-8 rounded-lg max-w-xl w-full text-white shadow-lg relative">
-                    <button id="close-lore-modal-btn-${uniqueId}" class="absolute top-6 right-6 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full leading-none w-8 h-8 flex items-center justify-center">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                    <h2 class="text-2xl font-bold mb-4 border-b pb-2">Lore do Personagem</h2>
-                    <div id="lore-content" class="text-sm leading-relaxed overflow-y-auto max-h-96">
-                        ${loreHistoriaHtml}
-                        ${lorePersonalidadeHtml}
-                        ${loreMotivacaoHtml}
-                        ${!hasLore ? '<p class="italic text-gray-400">Nenhuma lore definida.</p>' : ''}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="absolute bottom-0 w-full p-4" style="display: ${(isModal || isInPlay) ? 'flex' : 'none'}">
-                <div class="pb-1 scrollable-content text-sm text-left ml-2 div-miniCards" style="display: flex; flex-direction: row; overflow-y: scroll;gap: 12px; scroll-snap-type: x mandatory; margin-left: 65px;">
-                    <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0.6;">
-                        <!-- RELATIONSHIPS_BAR -->
-                    </div>
-                    <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end;">
-                        <div class="pericias-scroll-area flex flex-col gap-2 px-2" style="overflow-y: auto; max-height: 250px;">
-                            ${periciasHtml}
+                        <div class="grid grid-row-6 gap-y-2 text-xs absolute bottom-[-2px] div-Stats" style="border-radius: 28px 0 0 0; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 10px; width: 42px;">
+                            ${mainAttributes.map(key => {
+                            const baseValue = parseInt(characterData.attributes[key]) || 0;
+                            const fixedBonus = totalFixedBonuses[key] || 0;
+                            const fixedBonusHtml = fixedBonus !== 0 ? ` <span class="text-green-400 font-semibold">${fixedBonus > 0 ? '+' : ''}${fixedBonus}</span>` : '';
+                            return `                        
+                                <label class="text-center" title="${key}">${baseValue}${fixedBonusHtml}<br>${key.slice(0, 3).toUpperCase()}</label>                                                      
+                            `;
+                            }).join('')}
                         </div>
                     </div>
-                    <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: flex-end;">
-                        <div id="inventory-magic-scroll-area-${uniqueId}" class="space-y-2" style="overflow-y: auto; max-height: 250px;">
+                    <div class="h-full right-2 absolute top-0 right-0 bottom-0 flex flex-col" style="align-items: flex-end;">
+                        <div class="mt-2 flex flex-col items-center">
+                            <div style="position: relative;" data-action="edit-stat" data-stat-type="vida" data-stat-max="${permanentMaxVida}">
+                                <i class="fa-solid fa-heart text-5xl" style="background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none" style="margin: auto;">
+                                    <span data-stat-current="vida">
+                                        ${characterData.attributes.vidaAtual || 0}
+                                    </span>
+                                    <hr style="width: 15px;">
+                                    <span data-stat-max-display="vida" style="bottom: 12px;">
+                                        ${permanentMaxVida}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div style="position: relative;" data-action="edit-stat" data-stat-type="mana" data-stat-max="${permanentMaxMana}" class="mt-4 flex flex-col items-center">
+                                <i class="fas fa-fire text-5xl" style="background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none pt-2" style="margin: auto;">
+                                    <span data-stat-current="mana">
+                                        ${characterData.attributes.manaAtual || 0}
+                                    </span>
+                                    <hr style="width: 15px;">
+                                    <span data-stat-max-display="mana" style="bottom: 12px;">
+                                        ${permanentMaxMana}
+                                    </span>
+                                </div>
+                            </div> 
+
+                            <div class="money-container rounded-full w-12 pb-2 pt-2 flex mt-4 items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="width: 42px; ${moneyContainerStyle} background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight});">
+                                💰$<span data-stat-current="dinheiro">${characterData.dinheiro || 0}</span>
+                            </div>
+                        </div> 
+                        
+                        <div style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;" class="absolute bottom-[-2px]">                    
+                            <div class="div-attack-stats grid grid-row-2 gap-y-2 text-xs pt-6" style="display: ${showAttackStatsSem ? 'block' : 'none'}; border-radius: 28px 0 0 0; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 8px; width: 42px; justify-content: center; align-content: space-around; padding-top: 15px;">
+                                ${attackSemManaStatsHtml}
+                            </div>
+                            <div class="div-attack-stats grid grid-row-2 gap-y-2 text-xs pt-6" style="display: ${showAttackStats ? 'block' : 'none'}; border-radius: 28px 0 0 0; background:${predominantColor.colorLight}; padding: 8px; width: 42px; justify-content: center; align-content: space-around; padding-top: 15px;">
+                                ${attackStatsHtml}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-[-3px] w-full" style="display: ${(isModal || isInPlay) ? 'flex' : 'none'}">
+                        <div class="scrollable-content text-sm text-left ml-2 div-miniCards" style="display: flex; flex-direction: row; overflow-y: scroll;gap: 12px; scroll-snap-type: x mandatory; margin-left: 55px;">
+                            <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0.6;">
+                                <!-- RELATIONSHIPS_BAR -->
+                            </div>
+                            <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div class="pericias-scroll-area flex flex-col gap-2 px-2" style="overflow-y: auto; max-height: 250px;">
+                                    ${periciasHtml}
+                                </div>
+                            </div>
+                            <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div id="inventory-magic-scroll-area-${uniqueId}" class="space-y-2" style="overflow-y: auto; max-height: 250px;">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
+                <div id="lore-icon-${uniqueId}" class="absolute top-8 left-1/2 -translate-x-1/2 text-center z-10"  data-action="toggle-lore">
+                    <h3 class="text-2xl font-bold">${characterData.title}</h3>
+                    <p class="text-md italic text-gray-300">${characterData.subTitle}</p>
+                </div>                
+            </div> 
         </div>
     `;
 
@@ -907,7 +886,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
             // Define a altura mínima do statsDiv igual à do miniCardsDiv.
             // Se miniCards for maior, statsDiv cresce.
             // Se miniCards for menor, o min-height será pequeno e o statsDiv manterá seu tamanho natural (comportamento "não fazer nada").
-            statsDiv.style.minHeight = `${miniCardsHeight - 10}px`;
+            statsDiv.style.minHeight = `${miniCardsHeight}px`;
             // Opcional: Ajustar o alinhamento do conteúdo para ficar centralizado ou distribuído se esticar muito
             statsDiv.style.display = 'flex';
             statsDiv.style.flexDirection = 'column';
