@@ -202,7 +202,7 @@ export async function saveSpellCard(spellForm, type) {
     const spellCategorySelect = document.getElementById('spell-category-select');
     
     const spellAcertoInput = document.getElementById('spellAcerto');
-    const spellDamageInput = document.getElementById('spellDano');
+    const spellDamageInput = document.getElementById('spellDamage');
     // Novos campos
     const spellAcertoSemManaInput = document.getElementById('spellAcertoSemMana');
     const spellDanoSemManaInput = document.getElementById('spellDanoSemMana');
@@ -251,7 +251,7 @@ export async function saveSpellCard(spellForm, type) {
         image: imageBuffer,
         imageMimeType: imageMimeType,
         acerto: spellAcertoInput.value,
-        dano: spellDamageInput.value,
+        dano: spellDamageInput.value,  
         // Novos campos salvos
         acertoSemMana: spellAcertoSemManaInput ? spellAcertoSemManaInput.value : '',
         danoSemMana: spellDanoSemManaInput ? spellDanoSemManaInput.value : '',
