@@ -1,6 +1,6 @@
 // local_db.js
 import { initDrive, loadFromDrive, saveToDrive } from './drive_adapter.js';
-import { showCustomAlert, showTopAlert, showCustomConfirm } from './ui_utils.js';
+import { showCustomAlert, showTopAlert, showCustomConfirm, bufferToBlob } from './ui_utils.js';
 
 let db;
 let isDriveLoaded = false;
@@ -41,42 +41,108 @@ function base64ToArrayBuffer(base64) {
     return bytes.buffer;
 }
 
-// --- Modais de Progresso (Com Barra) ---
+// --- Modais de Progresso (Com Slider Animado) ---
 let progressModal = null;
+
+// Função auxiliar para popular o slider com imagens do DB
+async function populateProgressSlider(trackElement) {
+    trackElement.innerHTML = '';
+    
+    // Tenta pegar algumas imagens de personagens e itens
+    const cards = await getData('rpgCards') || [];
+    const items = await getData('rpgItems') || [];
+    
+    // Junta tudo e embaralha (simples)
+    let mixedItems = [...cards, ...items].sort(() => 0.5 - Math.random());
+    
+    // Se tiver poucos itens, duplica para preencher
+    if (mixedItems.length > 0 && mixedItems.length < 10) {
+        mixedItems = [...mixedItems, ...mixedItems, ...mixedItems]; 
+    }
+    
+    // Limita a 20 para performance
+    const selectedItems = mixedItems.slice(0, 20);
+    
+    const createCardEl = (item) => {
+        const div = document.createElement('div');
+        div.className = 'progress-mini-card';
+        
+        if (item && item.image && item.imageMimeType) {
+            const blob = bufferToBlob(item.image, item.imageMimeType);
+            const url = URL.createObjectURL(blob);
+            div.style.backgroundImage = `url('${url}')`;
+        } else {
+            // Fallback ícone
+            div.classList.add('progress-mini-card-icon');
+            div.innerHTML = '<i class="fas fa-dice-d20"></i>';
+        }
+        return div;
+    };
+
+    if (selectedItems.length === 0) {
+        // Se não tiver nada no banco, cria placeholders
+        for (let i = 0; i < 10; i++) {
+            const div = document.createElement('div');
+            div.className = 'progress-mini-card progress-mini-card-icon';
+            div.innerHTML = '<i class="fas fa-question"></i>';
+            trackElement.appendChild(div);
+        }
+    } else {
+        selectedItems.forEach(item => {
+            trackElement.appendChild(createCardEl(item));
+        });
+    }
+
+    // DUPLICAR o conteúdo para criar o efeito de loop infinito sem buracos
+    // Clone children
+    const children = Array.from(trackElement.children);
+    children.forEach(child => {
+        trackElement.appendChild(child.cloneNode(true));
+    });
+}
+
+
 function createProgressModal() {
     if (document.getElementById('progress-modal')) return;
     const modal = document.createElement('div');
     modal.id = 'progress-modal';
     modal.className = 'hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[999]';
     modal.innerHTML = `
-        <div class="bg-gray-900 border-2 border-indigo-800/50 text-white rounded-2xl shadow-2xl w-64 max-w-sm text-center p-6 relative">
-            <div class="loading-dice text-4xl mb-3 text-indigo-400"><i class="fas fa-dice-d20 fa-spin"></i></div>
-            <h3 id="progress-title" class="text-lg font-bold text-indigo-300 mb-1">Processando...</h3>
-            <p id="progress-message" class="text-gray-400 text-sm mb-4">Aguarde...</p>
+        <div class="bg-gray-900 border-2 border-indigo-800/50 text-white rounded-2xl shadow-2xl w-80 max-w-sm text-center p-6 relative overflow-hidden">
+            <h3 id="progress-title" class="text-lg font-bold text-indigo-300 mb-4">Processando...</h3>
             
-            <!-- Barra de Progresso Visual -->
-            <div class="w-full bg-gray-700 rounded-full h-3 mb-1 overflow-hidden">
-                <div id="progress-bar-fill" class="bg-indigo-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            <!-- Slider Animado -->
+            <div class="progress-slider-container">
+                <div id="progress-slider-track" class="progress-slider-track">
+                    <!-- Cards injetados via JS -->
+                </div>
             </div>
-            <div class="flex justify-between text-xs text-gray-500">
+
+            <p id="progress-message" class="text-gray-400 text-sm mb-2 mt-4 font-mono">Aguarde...</p>
+            
+            <div class="flex justify-center text-xs text-indigo-400 font-bold">
                 <span id="progress-percent">0%</span>
-                <span id="progress-status-text">Iniciando</span>
             </div>
 
             <!-- Botão de Abortar -->
-            <button id="abort-progress-btn" class="mt-4 text-xs text-red-400 hover:text-red-300 hidden">Cancelar Operação</button>
+            <button id="abort-progress-btn" class="mt-4 text-xs text-red-400 hover:text-red-300 hidden border border-red-500/30 px-3 py-1 rounded">Cancelar</button>
         </div>
     `;
     document.body.appendChild(modal);
     progressModal = modal;
 }
 
-export function showProgressModal(title = "Processando...", initialPercent = 0) {
+export async function showProgressModal(title = "Processando...", initialPercent = 0) {
     if (!progressModal) createProgressModal();
     const modal = document.getElementById('progress-modal');
     modal.querySelector('#progress-title').textContent = title;
     modal.querySelector('#progress-message').textContent = 'Iniciando...';
-    modal.querySelector('#abort-progress-btn').classList.add('hidden'); // Reset do botão
+    modal.querySelector('#abort-progress-btn').classList.add('hidden'); 
+    
+    // Popula o slider com imagens reais
+    const track = modal.querySelector('#progress-slider-track');
+    await populateProgressSlider(track);
+
     updateProgressBar(initialPercent);
     modal.classList.remove('hidden');
 }
@@ -86,31 +152,27 @@ export function updateProgress(message, percent = null) {
     const modal = document.getElementById('progress-modal');
     if (message) {
         modal.querySelector('#progress-message').textContent = message;
-        modal.querySelector('#progress-status-text').textContent = message;
     }
     if (percent !== null) updateProgressBar(percent);
 }
 
 function updateProgressBar(percent) {
     if (!progressModal) return;
-    const bar = document.getElementById('progress-bar-fill');
     const text = document.getElementById('progress-percent');
     
     if (percent === -1) {
-        // Indeterminado
-        bar.style.width = '100%';
-        bar.classList.add('animate-pulse');
-        text.textContent = '--%';
+        text.textContent = '...';
     } else {
-        bar.classList.remove('animate-pulse');
         const p = Math.max(0, Math.min(100, percent));
-        bar.style.width = `${p}%`;
         text.textContent = `${Math.floor(p)}%`;
     }
 }
 
 export function hideProgressModal() {
     if (!progressModal) return;
+    // Limpa o track para liberar memória das ObjectURLs se necessário (o browser gerencia, mas é bom resetar)
+    const track = progressModal.querySelector('#progress-slider-track');
+    if(track) track.innerHTML = ''; 
     progressModal.classList.add('hidden');
 }
 
@@ -229,7 +291,7 @@ export async function manualSaveToDrive() {
     }
 
     if(await showCustomConfirm('Isso substituirá o backup no Google Drive. Continuar?')) {
-        showProgressModal("Salvando na Nuvem", 0);
+        await showProgressModal("Salvando na Nuvem", 0);
         
         // Controlador de Abortamento (para Internet cair ou User cancelar)
         const controller = new AbortController();
@@ -291,7 +353,7 @@ export async function manualLoadFromDrive() {
     }
 
     if(await showCustomConfirm('Isso substituirá TODOS os dados locais pelos da Nuvem. Continuar?')) {
-        showProgressModal("Baixando da Nuvem", 0);
+        await showProgressModal("Baixando da Nuvem", 0);
         
         const controller = new AbortController();
         const signal = controller.signal;
@@ -406,7 +468,7 @@ export function removeData(storeName, key) {
 // --- Importação/Exportação Manual (Mantidas) ---
 
 export async function exportDatabase(onProgress = () => {}) {
-    showProgressModal("Exportando Local", 0);
+    await showProgressModal("Exportando Local", 0);
     try {
         updateProgress("Coletando dados...", 20);
         const exportedData = await getAllDataAsJSON();
@@ -432,7 +494,7 @@ export async function exportDatabase(onProgress = () => {}) {
 }
 
 export async function importDatabase(file, onProgress = () => {}) {
-    showProgressModal("Importando Local", 0);
+    await showProgressModal("Importando Local", 0);
     try {
         updateProgress("Lendo arquivo...", 30);
         const content = await file.text();
@@ -451,7 +513,7 @@ export async function importDatabase(file, onProgress = () => {}) {
 }
 
 export async function exportImagesAsPng(onProgress = () => {}) {
-    showProgressModal("Exportando Imagens", 0);
+    await showProgressModal("Exportando Imagens", 0);
     
     // Helper local para usar a modal de progresso global
     const localOnProgress = (msg) => updateProgress(msg, -1);
