@@ -2,6 +2,10 @@
 import { initDrive, loadFromDrive, saveToDrive } from './drive_adapter.js';
 import { showCustomAlert, showTopAlert, showCustomConfirm } from './ui_utils.js';
 
+import { renderFullItemSheet } from './item_renderer.js';
+import { renderFullSpellSheet } from './magic_renderer.js';
+import { renderFullAttackSheet } from './attack_renderer.js';
+import { renderFullCharacterSheet } from './card-renderer.js';
 let db;
 let isDriveLoaded = false;
 
@@ -41,17 +45,90 @@ function base64ToArrayBuffer(base64) {
     return bytes.buffer;
 }
 
+async function createMiniCards()
+{
+    const [characters, spells, items, attacks] = await Promise.all([getData('rpgCards'), getData('rpgSpells'), getData('rpgItems'), getData('rpgAttacks') ]);
+
+    let allCardsHtml = '<div id="characters-grid" class="relationships-grid relationships-grid-slide expanded" style="overflow-y: auto; ">';
+
+    let skillsGridHtml = '';
+    if (spells.length > 0) {
+        const skillCardsHtml = await Promise.all(spells.map(async (skill) => {
+            const miniSheetHtml = await renderFullSpellSheet(skill, false);
+            return `
+                <div class="related-spell-grid-item" data-id="${skill.id}" data-type="skill" style="margin-right: -15px;">
+                    ${miniSheetHtml}
+                </div>
+            `;
+        }));
+
+        allCardsHtml += ` ${skillCardsHtml.join('')}  `;
+    }
+
+    let charactersGridHtml = '';
+    if (characters.length > 0) {
+        const charactersCardsHtml = await Promise.all(characters.map(async (character) => {
+            const miniSheetHtml = await renderFullCharacterSheet(character, false);
+            return `
+                <div class="related-character-grid-item" data-id="${character.id}" data-type="character" style="margin-right: -15px;">
+                    ${miniSheetHtml}
+                </div>
+            `;
+        }));
+
+        allCardsHtml += ` ${charactersCardsHtml.join('')} `;
+    }
+
+    let itemsGridHtml = '';
+    if (items.length > 0) {
+        const itemsCardsHtml = await Promise.all(items.map(async (item) => {
+            const miniSheetHtml = await renderFullItemSheet(item, false);
+            return `
+                <div class="related-item-grid-item" data-id="${item.id}" data-type="item" style="margin-right: -15px;">
+                    ${miniSheetHtml}
+                </div>
+            `;
+        }));
+
+        allCardsHtml += ` ${itemsCardsHtml.join('')} `;
+    }
+
+    let attackGridHtml = '';
+    if (attacks.length > 0) {
+        const attackCardsHtml = await Promise.all(attacks.map(async (attack) => {
+            const miniSheetHtml = await renderFullAttackSheet(attack, false);
+            return `
+                <div class="related-attack-grid-item" data-id="${attack.id}" data-type="attacks" style="margin-right: -15px;">
+                    ${miniSheetHtml}
+                </div>
+            `;
+        }));
+
+       allCardsHtml += ` ${attackCardsHtml.join('')} </div> `;
+    }
+
+    console.log("Grids gerados: ", allCardsHtml);
+    return allCardsHtml;
+
+}
+
 // --- Modais de Progresso (Com Barra) ---
 let progressModal = null;
-function createProgressModal() {
+async function createProgressModal() {
+
+   let grid = await createMiniCards();
+
     if (document.getElementById('progress-modal')) return;
     const modal = document.createElement('div');
     modal.id = 'progress-modal';
     modal.className = 'hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[999]';
     modal.innerHTML = `
-        <div class="bg-gray-900 border-2 border-indigo-800/50 text-white rounded-2xl shadow-2xl w-64 max-w-sm text-center p-6 relative">
+        <div class="bg-gray-900 border-2 border-indigo-800/50 text-white rounded-2xl shadow-2xl w-72 max-w-sm text-center p-6 relative" style="overflow: hidden;">
             <div class="loading-dice text-4xl mb-3 text-indigo-400"><i class="fas fa-dice-d20 fa-spin"></i></div>
-            <h3 id="progress-title" class="text-lg font-bold text-indigo-300 mb-1">Processando...</h3>
+            <h3 id="progress-title" class="text-lg font-bold text-indigo-300" style="margin-bottom: 20px;">Processando...</h3>
+            <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0.6;">
+                ${grid}
+            </div>
             <p id="progress-message" class="text-gray-400 text-sm mb-4">Aguarde...</p>
             
             <!-- Barra de Progresso Visual -->

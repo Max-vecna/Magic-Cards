@@ -689,7 +689,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
 .related-spell-grid-item,
 .related-attack-grid-item,
 .related-item-grid-item,
-.related-skill-grid-item {
+.related-skill-grid-item{
     flex-shrink: 0;
     width: 60px;
     height: 92px;
