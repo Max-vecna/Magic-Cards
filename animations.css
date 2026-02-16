@@ -3,11 +3,10 @@
 .relationships-grid-slide {
     overflow: hidden;
     position: relative;
-    overflow: hidden;
 }
 
 .relationships-grid-slide.expanded {
-    animation: auto-slide-cards 20s linear infinite;
+    animation: auto-slide-cards 50s linear infinite;
     width: max-content;
 }
 
@@ -20,7 +19,11 @@
     0% {
         transform: translateX(0);
     }
-    100% {
+    50% {
         transform: translateX(-50%);
+    }
+    100%
+    { 
+        transform: translateX(0);
     }
 }
