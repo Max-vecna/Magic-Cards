@@ -706,16 +706,16 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                 <button id="close-sheet-btn-${uniqueId}" class="bg-red-600 hover:text-white thumb-btn" style="display: ${isModal ? 'flex' : 'none'}"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div id="character-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white" style="${origin}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; box-shadow: 0 0 20px ${predominantColor.colorLight}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto;">
-            <div class="w-full h-full" style="background: linear-gradient(to bottom, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4);">
-                <div class="rounded-lg absolute inset-0" style="width: 94%; height: 96%; border: 3px solid ${predominantColor.colorLight}; margin: auto;">
-                    <div class="h-full w-12 left-2 absolute top-0 left-0 bottom-0">
-                        <div class="div-combat-stats grid grid-row-6 gap-y-2 text-xs absolute top-[-2px]" style="border-radius: 0 0 28px 0; background: ${predominantColor.colorLight}; padding: 10px; width: 42px; justify-content: space-evenly;">
+            <div class="w-full h-full" style="background: linear-gradient(to bottom, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); box-shadow: inset 0px 0px 5px black;">
+                <div class="rounded-lg absolute inset-0" style="width: 94%; height: 96%; border: 3px solid ${predominantColor.colorLight}; margin: auto; box-shadow: inset 0px 0px 5px black; box-shadow: 0px 0px 5px black;">
+                    <div class="h-full w-12 left-2 absolute top-0 bottom-0">
+                        <div class="div-combat-stats grid grid-row-6 gap-y-2 text-xs absolute top-2" style="border-radius: 28px 5px 28px 5px; background: ${predominantColor.colorLight}; padding: 10px; width: 42px; justify-content: space-evenly; box-shadow: 0 0 10px black;">
                             <div class="text-center font-bold" style="color: rgb(0 247 85);">LV<br>${characterData.level || 0}</div>
                             ${defenseStatsHtml}
                             <div class="text-center">CD<br>${cdValue}</div>
                         </div>
 
-                        <div class="grid grid-row-6 gap-y-2 text-xs absolute bottom-[-2px] div-Stats" style="border-radius: 28px 0 0 0; background: ${predominantColor.colorLight}; padding: 10px; width: 42px;">
+                        <div class="grid grid-row-6 gap-y-2 text-xs absolute bottom-2 div-Stats" style="border-radius: 28px 5px 28px 5px; background: ${predominantColor.colorLight}; padding: 10px; width: 42px; box-shadow: 0 0 10px black; ">
                             ${mainAttributes.map(key => {
                             const baseValue = parseInt(characterData.attributes[key]) || 0;
                             const fixedBonus = totalFixedBonuses[key] || 0;
