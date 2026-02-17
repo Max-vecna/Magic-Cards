@@ -98,7 +98,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
 
     // Modificado para suportar Acerto/Dano Sem Mana
     let extraStatsHtml = '';
-    const hasAnyStats = spellData.acerto || spellData.dano || spellData.acertoSemMana || spellData.danoSemMana;
+    const hasAnyStats = spellData.acerto || spellData.dano || spellData.critico || spellData.danoSemMana;
     if (hasAnyStats) {
         extraStatsHtml = `
             <div class="flex flex-col gap-1 mt-2 mb-2 text-sm text-center absolute w-full" style="top: -75px; margin: 0px 11px; width: calc(100% - 22px);">
@@ -109,7 +109,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
                 </div>
                 <!-- Linha Sem Mana -->
                 <div class="flex justify-between w-full mt-4" style="font-size: 0.8em; margin-top: -5px;">
-                    ${spellData.acertoSemMana ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-teal-500">${spellData.acertoSemMana}</span> </div>` : '<div></div>'}
+                    ${spellData.critico ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-teal-500">${spellData.critico}</span> </div>` : '<div></div>'}
                     ${spellData.danoSemMana ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-red-500">${spellData.danoSemMana}</span> </div>` : '<div></div>'}
                 </div>
             </div>

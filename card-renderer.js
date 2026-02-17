@@ -81,7 +81,7 @@ export async function updateStatDisplay(sheetContainer, characterData) {
     
     // --- ATUALIZADO: Separação de Stats ---
     // Definição das duas listas de stats para busca
-    const attackStats = { acerto: 'ATK', dano: 'DMG', acertoSemMana: 'ATK s/Mana', danoSemMana: 'DMG s/Mana' };
+    const attackStats = { acerto: 'ATK', dano: 'DMG', critico: 'ATK s/Mana', danoSemMana: 'DMG s/Mana' };
     const defenseStats = { armadura: 'CA', esquiva: 'ES', bloqueio: 'BL', deslocamento: 'DL' };
     
     // Busca elementos em AMBOS os containers (novo div-attack-stats e div-combat-stats existente)
@@ -528,32 +528,50 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     }
 
     // --- SEPARAÇÃO DOS STATS EM DOIS GRUPOS ---
-    const attackStats = { acerto: 'ATK', dano: 'DMG'};
-    const attackStatsSemMana = { acertoSemMana: 'ATK s/Mana', danoSemMana: 'DMG s/Mana' };
+    const attackStats = { acerto: 'ATK', critico: 'ATK s/Mana', dano: 'DMG', danoSemMana: 'DMG s/Mana'};
     const defenseStats = { armadura: 'CA', esquiva: 'ES', bloqueio: 'BL', deslocamento: 'DL' };
 
     const hasAcerto = characterData.attributes.acerto && String(characterData.attributes.acerto).trim() !== '';
     const hasDano = characterData.attributes.dano && String(characterData.attributes.dano).trim() !== '';
     const showAttackStats = hasAcerto || hasDano;
-    const hasAcertoSem = characterData.attributes.acertoSemMana && String(characterData.attributes.acertoSemMana).trim() !== '';
+    const hasAcertoSem = characterData.attributes.critico && String(characterData.attributes.critico).trim() !== '';
     const hasDanoSem = characterData.attributes.danoSemMana && String(characterData.attributes.danoSemMana).trim() !== '';
     const showAttackStatsSem = hasAcertoSem || hasDanoSem;
    
 
     // Gera HTML para Acerto e Dano (Novo Card)
-    const attackStatsHtml = Object.entries(attackStats).map(([stat, label]) => {
+    const attackStatsHtml = Object.entries(attackStats).map(([stat, label]) => 
+    {
         const baseValue = characterData.attributes[stat] || 0;
         const content = baseValue || '-';
-        const colorStyle = stat === 'acerto' ? 'color: #15fa61;' : (stat === 'dano' ? 'color: #bf3f3f;' : '');
-        return `<div class="text-center font-bold text-sm" style="${stat === 'acerto' ? 'margin-bottom: 20px;' : ''}"><span style="${colorStyle}; writing-mode: vertical-rl; text-orientation: upright;">${content}</div>`;
+        const colorStyle = stat === 'acerto' ? '#2fa582' :
+                           stat === 'dano' ? '#a52f2f' : 
+                           stat === 'critico' ? '#acb43b' : 
+                           stat === 'danoSemMana' ? '#a52f2f' : ""; //dano em criatura sem mana
+
+
+        const icon = stat === 'acerto' ? 'fa-dice-d20' : //dado
+                     stat === 'dano' ? 'fa-solid fa-fire-flame-curved' :  //dano em criatura com mana
+                     stat === 'critico' ? 'fa-crosshairs' : //critico
+                     stat === 'danoSemMana' ? 'fa-skull' : ""; //dano em criatura sem mana
+
+        return `
+            <div style="position: relative; transform: scale(.8); display: ${content === "-" ? 'none' : 'block'}" class="mt-4 flex flex-col items-center">
+                <i class="fas ${icon} text-5xl" style="background: ${colorStyle}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-white text-xs pointer-events-none" style="margin: auto;">
+                    <div class="text-center text-sm">
+                        <span class="font-bold">
+                            ${content.split("+")[0] || ""}
+                        </span>
+                        <hr style="width: 100%;">
+                        <span style="bottom: 12px;" class="font-bold">
+                            +${content.split("+")[1] || ""}
+                        </span>
+                    </div>
+                </div>
+            </div> `;
     }).join('');
 
-    const attackSemManaStatsHtml = Object.entries(attackStatsSemMana).map(([stat, label]) => {
-        const baseValue = characterData.attributes[stat] || 0;
-        const content = baseValue || '-';
-        const colorStyle = stat === 'acertoSemMana' ? 'color: #15fa61;' : (stat === 'danoSemMana' ? 'color: #bf3f3f;' : '');
-        return `<div class="text-center font-bold text-sm" style="${stat === 'acertoSemMana' ? 'margin-bottom: 20px;' : ''}"><span style="${colorStyle}; writing-mode: vertical-rl; text-orientation: upright;">${content}</div>`;
-    }).join('');
 
     // Gera HTML para Defesa (Card Existente)
     const defenseStatsHtml = Object.entries(defenseStats).map(([stat, label]) => {
@@ -678,15 +696,9 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
 
     const hasLore = characterData.lore && (characterData.lore.historia || characterData.lore.personalidade || characterData.lore.motivacao);
     
-    const loreHistoriaHtml = characterData.lore?.historia
-        ? `<h4>História</h4><p class="mb-4">${characterData.lore.historia}</p>`
-        : '';
-    const lorePersonalidadeHtml = characterData.lore?.personalidade
-        ? `<h4>Personalidade</h4><p class="mb-4">${characterData.lore.personalidade}</p>`
-        : '';
-    const loreMotivacaoHtml = characterData.lore?.motivacao
-        ? `<h4>Motivação</h4><p>${characterData.lore.motivacao}</p>`
-        : '';
+    const loreHistoriaHtml = characterData.lore?.historia ? `<h4>História</h4><p class="mb-4">${characterData.lore.historia}</p>` : '';
+    const lorePersonalidadeHtml = characterData.lore?.personalidade ? `<h4>Personalidade</h4><p class="mb-4">${characterData.lore.personalidade}</p>` : '';
+    const loreMotivacaoHtml = characterData.lore?.motivacao ? `<h4>Motivação</h4><p>${characterData.lore.motivacao}</p>` : '';
 
     const hasMoney = (characterData.dinheiro || 0) > 0;
     const hasMana = (characterData.mana) > 0;
@@ -700,13 +712,13 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
             <div class="w-full h-full" style="background: linear-gradient(to bottom, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4);">
                 <div class="rounded-lg absolute inset-0" style="width: 94%; height: 96%; border: 3px solid ${predominantColor.colorLight}; margin: auto;">
                     <div class="h-full w-12 left-2 absolute top-0 left-0 bottom-0">
-                        <div class="div-combat-stats grid grid-row-6 gap-y-2 text-xs absolute top-[-2px]" style="border-radius: 0  0 28px 0; background: linear-gradient(to top, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 10px; width: 42px; justify-content: space-evenly; ">
+                        <div class="div-combat-stats grid grid-row-6 gap-y-2 text-xs absolute top-[-2px] glass-element" style="border-radius: 0 0 28px 0; background: linear-gradient(to top, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 10px; width: 42px; justify-content: space-evenly;">
                             <div class="text-center font-bold" style="color: rgb(0 247 85);">LV<br>${characterData.level || 0}</div>
                             ${defenseStatsHtml}
                             <div class="text-center">CD<br>${cdValue}</div>
                         </div>
 
-                        <div class="grid grid-row-6 gap-y-2 text-xs absolute bottom-[-2px] div-Stats" style="border-radius: 28px 0 0 0; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 10px; width: 42px;">
+                        <div class="grid grid-row-6 gap-y-2 text-xs absolute bottom-[-2px] div-Stats  glass-element" style="border-radius: 28px 0 0 0; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 10px; width: 42px;">
                             ${mainAttributes.map(key => {
                             const baseValue = parseInt(characterData.attributes[key]) || 0;
                             const fixedBonus = totalFixedBonuses[key] || 0;
@@ -717,7 +729,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                             }).join('')}
                         </div>
                     </div>
-                    <div class="h-full right-2 absolute top-0 right-0 bottom-0 flex flex-col" style="align-items: flex-end;">
+                    <div class="h-full right-2 absolute top-0 right-0 bottom-0 flex flex-col" style="align-items: flex-end; justify-content: space-between;">
                         <div class="mt-2 flex flex-col items-center">
                             <div style="position: relative;" data-action="edit-stat" data-stat-type="vida" data-stat-max="${permanentMaxVida}">
                                 <i class="fa-solid fa-heart text-5xl" style="background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
@@ -748,15 +760,9 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                             <div class="money-container rounded-full w-12 pb-2 pt-2 flex mt-4 items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="width: 42px; ${moneyContainerStyle} background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight});">
                                 💰$<span data-stat-current="dinheiro">${characterData.dinheiro || 0}</span>
                             </div>
-                        </div> 
-                        
-                        <div style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;" class="absolute bottom-[-2px]">                    
-                            <div class="div-attack-stats grid grid-row-2 gap-y-2 text-xs pt-6" style="display: ${showAttackStatsSem ? 'block' : 'none'}; border-radius: 28px 0 0 0; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 8px; width: 42px; justify-content: center; align-content: space-around; padding-top: 15px;">
-                                ${attackSemManaStatsHtml}
-                            </div>
-                            <div class="div-attack-stats grid grid-row-2 gap-y-2 text-xs pt-6" style="display: ${showAttackStats ? 'block' : 'none'}; border-radius: 28px 0 0 0; background:${predominantColor.colorLight}; padding: 8px; width: 42px; justify-content: center; align-content: space-around; padding-top: 15px;">
-                                ${attackStatsHtml}
-                            </div>
+                        </div>  
+                        <div class="mb-2 flex flex-col items-center">
+                            ${attackStatsHtml}
                         </div>
                     </div>
 

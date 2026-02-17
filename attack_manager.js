@@ -105,7 +105,7 @@ export async function saveAttackCard(attackForm) {
     const attackAcertoInput = document.getElementById('attackAcerto');
     const attackDamageInput = document.getElementById('attackDamage');
     // Novos campos
-    const attackAcertoSemManaInput = document.getElementById('attackAcertoSemMana');
+    const attackcriticoInput = document.getElementById('attackcritico');
     const attackDanoSemManaInput = document.getElementById('attackDanoSemMana');
 
     let existingData = null;
@@ -125,7 +125,7 @@ export async function saveAttackCard(attackForm) {
         acerto: attackAcertoInput.value,
         dano: attackDamageInput.value,
         // Novos campos salvos
-        acertoSemMana: attackAcertoSemManaInput ? attackAcertoSemManaInput.value : '',
+        critico: attackcriticoInput ? attackcriticoInput.value : '',
         danoSemMana: attackDanoSemManaInput ? attackDanoSemManaInput.value : '',
         image: imageBuffer,
         imageMimeType: imageMimeType,
@@ -164,9 +164,9 @@ export async function editAttack(attackId) {
     document.getElementById('attackDamage').value = attackData.dano || '';
     
     // Novos campos preenchidos na edição
-    const semManaAcerto = document.getElementById('attackAcertoSemMana');
+    const semManaAcerto = document.getElementById('attackcritico');
     const semManaDano = document.getElementById('attackDanoSemMana');
-    if (semManaAcerto) semManaAcerto.value = attackData.acertoSemMana || '';
+    if (semManaAcerto) semManaAcerto.value = attackData.critico || '';
     if (semManaDano) semManaDano.value = attackData.danoSemMana || '';
     
     await populateCharacterSelect('attackCharacterOwner');

@@ -204,7 +204,7 @@ export async function saveSpellCard(spellForm, type) {
     const spellAcertoInput = document.getElementById('spellAcerto');
     const spellDamageInput = document.getElementById('spellDamage');
     // Novos campos
-    const spellAcertoSemManaInput = document.getElementById('spellAcertoSemMana');
+    const spellcriticoInput = document.getElementById('spellcritico');
     const spellDanoSemManaInput = document.getElementById('spellDanoSemMana');
 
     const aumentosList = document.getElementById('spell-aumentos-list');
@@ -253,7 +253,7 @@ export async function saveSpellCard(spellForm, type) {
         acerto: spellAcertoInput.value,
         dano: spellDamageInput.value,  
         // Novos campos salvos
-        acertoSemMana: spellAcertoSemManaInput ? spellAcertoSemManaInput.value : '',
+        critico: spellcriticoInput ? spellcriticoInput.value : '',
         danoSemMana: spellDanoSemManaInput ? spellDanoSemManaInput.value : '',
         
         enhanceImage: enhanceImageBuffer,
@@ -311,9 +311,9 @@ export async function editSpell(spellId) {
     document.getElementById('spellDamage').value = spellData.dano || '';
     
     // Novos campos preenchidos na edição
-    const semManaAcerto = document.getElementById('spellAcertoSemMana');
+    const semManaAcerto = document.getElementById('spellcritico');
     const semManaDano = document.getElementById('spellDanoSemMana');
-    if (semManaAcerto) semManaAcerto.value = spellData.acertoSemMana || '';
+    if (semManaAcerto) semManaAcerto.value = spellData.critico || '';
     if (semManaDano) semManaDano.value = spellData.danoSemMana || '';
 
     await populateCharacterSelect('spellCharacterOwner');

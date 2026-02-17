@@ -43,7 +43,7 @@ export async function renderFullAttackSheet(attackData, isModal) {
 
     // Modificado para suportar Acerto/Dano Sem Mana em Ataques
     let statsHtml = '';
-    const hasAnyStats = attackData.acerto || attackData.dano || attackData.acertoSemMana || attackData.danoSemMana;
+    const hasAnyStats = attackData.acerto || attackData.dano || attackData.critico || attackData.danoSemMana;
     if (hasAnyStats) {
         statsHtml = `
             <div class="flex flex-col gap-1 mt-2 mb-2 text-sm text-center absolute w-full" style="top: -75px; margin: 0px 11px; width: calc(100% - 22px);">
@@ -54,7 +54,7 @@ export async function renderFullAttackSheet(attackData, isModal) {
                 </div>
                 <!-- Linha Sem Mana -->
                 <div class="flex justify-between w-full mt-4" style="font-size: 0.8em; margin-top: -5px;">
-                    ${attackData.acertoSemMana ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-teal-500">${attackData.acertoSemMana}</span> </div>` : '<div></div>'}
+                    ${attackData.critico ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-teal-500">${attackData.critico}</span> </div>` : '<div></div>'}
                     ${attackData.danoSemMana ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-red-500">${attackData.danoSemMana}</span> </div>` : '<div></div>'}
                 </div>
             </div>

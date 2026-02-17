@@ -263,7 +263,7 @@ export async function saveCharacterCard(cardForm) {
     // NOVOS INPUTS
     const acertoInput = document.getElementById('acerto');
     const danoInput = document.getElementById('dano');
-    const acertoInputSemMana = document.getElementById('acertoSemMana');
+    const acertoInputSemMana = document.getElementById('critico');
     const danoInputSemMana = document.getElementById('danoSemMana');
 
     const selectedPericias = [];
@@ -296,7 +296,7 @@ export async function saveCharacterCard(cardForm) {
         // Salvando Acerto e Dano (String para permitir "+5" ou "1d8")
         acerto: acertoInput.value,
         dano: danoInput.value,
-        acertoSemMana: acertoInputSemMana.value,
+        critico: acertoInputSemMana.value,
         danoSemMana: danoInputSemMana.value
     };
     const lore = {
@@ -408,7 +408,7 @@ export async function editCard(cardId) {
     // PREENCHE ACERTO E DANO
     document.getElementById('acerto').value = attrs.acerto || '';
     document.getElementById('dano').value = attrs.dano || '';
-    document.getElementById('acertoSemMana').value = attrs.acertoSemMana || '';
+    document.getElementById('critico').value = attrs.critico || '';
     document.getElementById('danoSemMana').value = attrs.danoSemMana || '';
     
     document.getElementById('historia').value = cardData.lore?.historia || '';

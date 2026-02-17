@@ -1096,3 +1096,10 @@ body:not(.dark) .text-white { color: var(--text-color) !important; }
     padding-left: 20px;
     padding-right: 10px;
 }
+
+.glass-element {
+  
+  /* 2. Apply the backdrop blur */
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); /* For Safari support */
+}
