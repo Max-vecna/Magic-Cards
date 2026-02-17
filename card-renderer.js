@@ -544,20 +544,17 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     {
         const baseValue = characterData.attributes[stat] || 0;
         const content = baseValue || '-';
-        const colorStyle = stat === 'acerto' ? '#2fa582' :
-                           stat === 'dano' ? '#a52f2f' : 
-                           stat === 'critico' ? '#acb43b' : 
-                           stat === 'danoSemMana' ? '#a52f2f' : ""; //dano em criatura sem mana
+        const colorStyle =  predominantColor.colorLight ; //dano em criatura sem mana
 
 
         const icon = stat === 'acerto' ? 'fa-dice-d20' : //dado
-                     stat === 'dano' ? 'fa-solid fa-fire-flame-curved' :  //dano em criatura com mana
+                     stat === 'dano' ? 'fas fa-fire' :  //dano em criatura com mana
                      stat === 'critico' ? 'fa-crosshairs' : //critico
                      stat === 'danoSemMana' ? 'fa-skull' : ""; //dano em criatura sem mana
 
         return `
             <div style="position: relative; transform: scale(.8); display: ${content === "-" ? 'none' : 'block'}" class="mt-4 flex flex-col items-center">
-                <i class="fas ${icon} text-5xl" style="background: ${colorStyle}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                <i class="fas ${icon} text-5xl" style="background: ${colorStyle}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(2px 4px 6px black);"></i>
                 <div class="absolute inset-0 flex flex-col items-center justify-center text-white text-xs pointer-events-none" style="margin: auto;">
                     <div class="text-center text-sm">
                         <span class="font-bold">
@@ -712,13 +709,13 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
             <div class="w-full h-full" style="background: linear-gradient(to bottom, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4);">
                 <div class="rounded-lg absolute inset-0" style="width: 94%; height: 96%; border: 3px solid ${predominantColor.colorLight}; margin: auto;">
                     <div class="h-full w-12 left-2 absolute top-0 left-0 bottom-0">
-                        <div class="div-combat-stats grid grid-row-6 gap-y-2 text-xs absolute top-[-2px] glass-element" style="border-radius: 0 0 28px 0; background: linear-gradient(to top, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 10px; width: 42px; justify-content: space-evenly;">
+                        <div class="div-combat-stats grid grid-row-6 gap-y-2 text-xs absolute top-[-2px]" style="border-radius: 0 0 28px 0; background: ${predominantColor.colorLight}; padding: 10px; width: 42px; justify-content: space-evenly;">
                             <div class="text-center font-bold" style="color: rgb(0 247 85);">LV<br>${characterData.level || 0}</div>
                             ${defenseStatsHtml}
                             <div class="text-center">CD<br>${cdValue}</div>
                         </div>
 
-                        <div class="grid grid-row-6 gap-y-2 text-xs absolute bottom-[-2px] div-Stats  glass-element" style="border-radius: 28px 0 0 0; background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); padding: 10px; width: 42px;">
+                        <div class="grid grid-row-6 gap-y-2 text-xs absolute bottom-[-2px] div-Stats" style="border-radius: 28px 0 0 0; background: ${predominantColor.colorLight}; padding: 10px; width: 42px;">
                             ${mainAttributes.map(key => {
                             const baseValue = parseInt(characterData.attributes[key]) || 0;
                             const fixedBonus = totalFixedBonuses[key] || 0;
@@ -732,7 +729,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                     <div class="h-full right-2 absolute top-0 right-0 bottom-0 flex flex-col" style="align-items: flex-end; justify-content: space-between;">
                         <div class="mt-2 flex flex-col items-center">
                             <div style="position: relative;" data-action="edit-stat" data-stat-type="vida" data-stat-max="${permanentMaxVida}">
-                                <i class="fa-solid fa-heart text-5xl" style="background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                                <i class="fa-solid fa-heart text-5xl" style="background: ${predominantColor.colorLight}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;filter: drop-shadow(2px 4px 6px black);"></i>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none" style="margin: auto;">
                                     <span data-stat-current="vida">
                                         ${characterData.attributes.vidaAtual || 0}
@@ -745,7 +742,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                             </div>
                             
                             <div style="position: relative;" data-action="edit-stat" data-stat-type="mana" data-stat-max="${permanentMaxMana}" class="mt-4 flex flex-col items-center">
-                                <i class="fas fa-fire text-5xl" style="background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                                <i class="fas fa-fire text-5xl" style="background: ${predominantColor.colorLight}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;filter: drop-shadow(2px 4px 6px black);"></i>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center font-bold text-white text-xs pointer-events-none pt-2" style="margin: auto;">
                                     <span data-stat-current="mana">
                                         ${characterData.attributes.manaAtual || 0}
@@ -757,7 +754,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                                 </div>
                             </div> 
 
-                            <div class="money-container rounded-full w-12 pb-2 pt-2 flex mt-4 items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="width: 42px; ${moneyContainerStyle} background: linear-gradient(to bottom, ${predominantColor.color30}, ${predominantColor.colorLight});">
+                            <div class="money-container rounded-full w-12 pb-2 pt-2 flex mt-4 items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="width: 42px; ${moneyContainerStyle} background: ${predominantColor.colorLight};">
                                 💰$<span data-stat-current="dinheiro">${characterData.dinheiro || 0}</span>
                             </div>
                         </div>  
