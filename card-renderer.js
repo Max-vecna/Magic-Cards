@@ -620,72 +620,40 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     if (spellsOnly.length > 0) {
         const spellCardsHtml = await Promise.all(spellsOnly.map(async (spell) => {
             const miniSheetHtml = await renderFullSpellSheet(spell, false); 
-            return `
-                <div class="related-spell-grid-item" data-id="${spell.id}" data-type="spell">
-                    ${miniSheetHtml}
-                </div>
-            `;
+            return `<div class="related-spell-grid-item" data-id="${spell.id}" data-type="spell"> ${miniSheetHtml} </div>`;
         }));
 
-        spellsGridHtml = `
-            <div id="spells-grid-${uniqueId}" class="relationships-grid" style="overflow-y: auto;">
-                 ${spellCardsHtml.join('')}
-            </div>
-        `;
+        spellsGridHtml = ` <div id="spells-grid-${uniqueId}" class="relationships-grid" style="overflow-y: auto;"> ${spellCardsHtml.join('')} </div>`;
     }
 
     let skillsGridHtml = '';
     if (skillsOnly.length > 0) {
         const skillCardsHtml = await Promise.all(skillsOnly.map(async (skill) => {
             const miniSheetHtml = await renderFullSpellSheet(skill, false);
-            return `
-                <div class="related-skill-grid-item" data-id="${skill.id}" data-type="skill">
-                    ${miniSheetHtml}
-                </div>
-            `;
+            return `<div class="related-skill-grid-item" data-id="${skill.id}" data-type="skill"> ${miniSheetHtml} </div>`;
         }));
 
-        skillsGridHtml = `
-            <div id="skills-grid-${uniqueId}" class="relationships-grid" style="overflow-y: auto;">
-                 ${skillCardsHtml.join('')}
-            </div>
-        `;
+        skillsGridHtml = `<div id="skills-grid-${uniqueId}" class="relationships-grid" style="overflow-y: auto;"> ${skillCardsHtml.join('')} </div>`;
     }
 
     let attacksGridHtml = '';
     if (attackItems.length > 0) {
         const attackCardsHtml = await Promise.all(attackItems.map(async (attack) => {
             const miniSheetHtml = await renderFullAttackSheet(attack, false);
-            return `
-                <div class="related-attack-grid-item" data-id="${attack.id}" data-type="attack">
-                    ${miniSheetHtml}
-                </div>
-            `;
+            return `<div class="related-attack-grid-item" data-id="${attack.id}" data-type="attack"> ${miniSheetHtml} </div>`;
         }));
 
-        attacksGridHtml = `
-            <div id="attacks-grid-${uniqueId}" class="relationships-grid"  style="overflow-y: auto;">
-                 ${attackCardsHtml.join('')}
-            </div>
-        `;
+        attacksGridHtml = `<div id="attacks-grid-${uniqueId}" class="relationships-grid"  style="overflow-y: auto;"> ${attackCardsHtml.join('')} </div>`;
     }
 
     let itemsGridHtml = '';
     if (inventoryItems.length > 0) {
         const itemCardsHtml = await Promise.all(inventoryItems.map(async (item) => {
             const miniSheetHtml = await renderFullItemSheet(item, false);
-            return `
-                <div class="related-item-grid-item" data-id="${item.id}" data-type="item">
-                    ${miniSheetHtml}
-                </div>
-            `;
+            return `<div class="related-item-grid-item" data-id="${item.id}" data-type="item"> ${miniSheetHtml} </div>`;
         }));
 
-        itemsGridHtml = `
-            <div id="items-grid-${uniqueId}" class="relationships-grid" style="overflow-y: auto;">
-                 ${itemCardsHtml.join('')}
-            </div>
-        `;
+        itemsGridHtml = `<div id="items-grid-${uniqueId}" class="relationships-grid" style="overflow-y: auto;"> ${itemCardsHtml.join('')} </div>`;
     }
 
     const permanentMaxVida = (characterData.attributes.vida || 0) + (totalFixedBonuses.vida || 0);
@@ -703,11 +671,11 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
 
     const sheetHtml = `
         <div class="absolute top-6 right-6 z-20 flex flex-col gap-2">
-                <button id="close-sheet-btn-${uniqueId}" class="bg-red-600 hover:text-white thumb-btn" style="display: ${isModal ? 'flex' : 'none'}"><i class="fa-solid fa-xmark"></i></button>
+            <button id="close-sheet-btn-${uniqueId}" class="bg-red-600 hover:text-white thumb-btn" style="display: ${isModal ? 'flex' : 'none'}"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div id="character-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white" style="${origin}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; box-shadow: 0 0 20px ${predominantColor.colorLight}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto;">
             <div class="w-full h-full" style="background: linear-gradient(to bottom, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); box-shadow: inset 0px 0px 5px black;">
-                <div class="rounded-lg absolute inset-0" style="width: 94%; height: 96%; border: 3px solid ${predominantColor.colorLight}; margin: auto; box-shadow: inset 0px 0px 5px black; box-shadow: 0px 0px 5px black;">
+                <div class="rounded-lg absolute inset-0" style="width: 94%; height: 96%; border: 3px solid ${predominantColor.colorLight}; margin: auto; box-shadow: inset 0px 0px 5px black, 0px 0px 5px black;">
                     <div class="h-full w-12 left-2 absolute top-0 bottom-0">
                         <div class="div-combat-stats grid grid-row-6 gap-y-2 text-xs absolute top-2" style="border-radius: 28px 5px 28px 5px; background: ${predominantColor.colorLight}; padding: 10px; width: 42px; justify-content: space-evenly; box-shadow: 0 0 10px black;">
                             <div class="text-center font-bold" style="color: rgb(0 247 85);">LV<br>${characterData.level || 0}</div>
@@ -889,7 +857,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
             // Define a altura mínima do statsDiv igual à do miniCardsDiv.
             // Se miniCards for maior, statsDiv cresce.
             // Se miniCards for menor, o min-height será pequeno e o statsDiv manterá seu tamanho natural (comportamento "não fazer nada").
-            statsDiv.style.minHeight = `${miniCardsHeight}px`;
+            statsDiv.style.minHeight = `${miniCardsHeight - 10}px`;
             // Opcional: Ajustar o alinhamento do conteúdo para ficar centralizado ou distribuído se esticar muito
             statsDiv.style.display = 'flex';
             statsDiv.style.flexDirection = 'column';

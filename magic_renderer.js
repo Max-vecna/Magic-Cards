@@ -64,7 +64,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
         aumentosHtml = `
             <div class="pt-2 scroll-section" data-bg-type="main">
                 <h3 class="text-sm font-semibold flex items-center gap-2">Aumentos</h3>
-                <div class="text-gray-300 text-xs leading-relaxed mt-1 pl-6 space-y-1">
+                <div class="text-gray-300 text-xs leading-relaxed mt-1 space-y-1">
                     ${createList(aumentosFixos, 'Bônus Fixos', 'text-green-300')}
                     ${createList(aumentosTemporarios, 'Bônus Temporários (Informativo)', 'text-blue-300')}
                 </div>
@@ -97,24 +97,36 @@ export async function renderFullSpellSheet(spellData, isModal) {
     const trueDataAttr = trueImageUrl ? `data-bg-image="${trueImageUrl}"` : '';
 
     // Modificado para suportar Acerto/Dano Sem Mana
-    let extraStatsHtml = '';
-    const hasAnyStats = spellData.acerto || spellData.dano || spellData.critico || spellData.danoSemMana;
-    if (hasAnyStats) {
-        extraStatsHtml = `
-            <div class="flex flex-col gap-1 mt-2 mb-2 text-sm text-center absolute w-full" style="top: -75px; margin: 0px 11px; width: calc(100% - 22px);">
-                <!-- Linha Principal -->
-                <div class="flex justify-between w-full" style="margin-bottom: 5px;">
-                    ${spellData.acerto ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-teal-300">${spellData.acerto}</span> </div>` : '<div></div>'}
-                    ${spellData.dano ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color30};"><span class="font-bold text-red-300">${spellData.dano}</span> </div>` : '<div></div>'}
+     const attackStats = { acerto: 'ATK', critico: 'ATK s/Mana', dano: 'DMG', danoSemMana: 'DMG s/Mana'};
+     // Gera HTML para Acerto e Dano (Novo Card)
+    const attackStatsHtml = Object.entries(attackStats).map(([stat, label]) => 
+    {
+        const baseValue = spellData[stat] || 0;
+        const content = baseValue || '-';
+        const colorStyle =  predominantColor.color30 ; //dano em criatura sem mana
+
+
+        const icon = stat === 'acerto' ? 'fa-dice-d20' : //dado
+                     stat === 'dano' ? 'fas fa-fire' :  //dano em criatura com mana
+                     stat === 'critico' ? 'fa-crosshairs' : //critico
+                     stat === 'danoSemMana' ? 'fa-skull' : ""; //dano em criatura sem mana
+
+        return `
+            <div style="position: relative; transform: scale(.8); display: ${content === "-" ? 'none' : 'block'}" class="flex flex-col items-center flex">
+                <i class="fas ${icon} text-5xl" style="background: ${predominantColor.color100}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-white text-xs pointer-events-none" style="margin: auto;">
+                    <div class="text-center text-sm">
+                        <span class="font-bold">
+                            ${content.split("+")[0] || ""}
+                        </span>
+                        <hr style="width: 100%;">
+                        <span style="bottom: 12px;" class="font-bold">
+                            +${content.split("+")[1] || ""}
+                        </span>
+                    </div>
                 </div>
-                <!-- Linha Sem Mana -->
-                <div class="flex justify-between w-full mt-4" style="font-size: 0.8em; margin-top: -5px;">
-                    ${spellData.critico ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-teal-500">${spellData.critico}</span> </div>` : '<div></div>'}
-                    ${spellData.danoSemMana ? `<div class="dados" style="--color-dados: ${predominantColor.color100}; --color-dadosBk: ${predominantColor.color100};"><span class="font-bold text-red-500">${spellData.danoSemMana}</span> </div>` : '<div></div>'}
-                </div>
-            </div>
-        `;
-    }
+            </div> `;
+    }).join('');
 
     const sheetHtml = `
         <button id="close-spell-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-50 thumb-btn" style="display:${isModal? "block": "none"};"><i class="fa-solid fa-xmark"></i></button>
@@ -123,8 +135,8 @@ export async function renderFullSpellSheet(spellData, isModal) {
             <div id="spell-bg-1-${uniqueId}" class="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700 ease-in-out" style="background-image: url('${mainImageUrl}'); z-index: 0; opacity: 1;"></div>
             <div id="spell-bg-2-${uniqueId}" class="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700 ease-in-out" style="background-image: url('${mainImageUrl}'); z-index: 0; opacity: 0;"></div>
 
-            <div class="absolute inset-0 w-full h-full z-10" style="background: linear-gradient(-180deg, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); display: flex; align-items: center; justify-content: center; pointer-events: none;">
-                <div class="rounded-lg" style="width: 100%; height: calc(100% - 20px); border: 3px solid ${predominantColor.color100}; margin: 10px;"></div>
+            <div class="absolute inset-0 w-full h-full z-10" style="background: linear-gradient(-180deg, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); display: flex; align-items: center; justify-content: center; pointer-events: none;box-shadow: inset 0px 0px 5px black; ">
+                <div class="rounded-lg" style="width: 100%; height: calc(100% - 20px); border: 3px solid ${predominantColor.color100}; margin: 10px;box-shadow: inset 0px 0px 5px black, 0px 0px 5px black;"></div>
             </div>
             
             <div class="w-full text-left absolute top-0 line-top z-20" style="background-color: ${predominantColor.color30}; padding-top: 20px; padding-bottom: 10px; text-align: center; --minha-cor: ${predominantColor.color100};">
@@ -132,9 +144,9 @@ export async function renderFullSpellSheet(spellData, isModal) {
                 ${topBarHtml}
             </div>
              
-            <div class="mt-auto  w-full text-left absolute bottom-0 z-20">  
-                   ${extraStatsHtml}           
+            <div class="mt-auto  w-full text-left absolute bottom-0 z-20">                              
                 <div class="p-6 pt-3 md:p-6 sheet-card-text-panel line-bottom" style="background-color: ${predominantColor.color30}; --minha-cor: ${predominantColor.color100};">                      
+                   
                     <div id="spell-scroll-container-${uniqueId}" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar" style="max-height: 12rem; height: 12rem">
                        
                         ${spellData.description ? `<div class="scroll-section" data-bg-type="main"><h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.description}</p></div>` : ''}
@@ -145,7 +157,11 @@ export async function renderFullSpellSheet(spellData, isModal) {
                         
                         ${aumentosHtml}
                     </div>
+                    <div class="flex row mt-2" style="justify-content: space-around;">
+                        ${attackStatsHtml}  
+                    </div>
                     ${statsHtml}
+                    
                 </div>
             </div>            
         </div>
