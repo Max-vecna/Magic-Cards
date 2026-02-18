@@ -146,10 +146,8 @@ export async function renderFullSpellSheet(spellData, isModal) {
              
             <div class="mt-auto  w-full text-left absolute bottom-0 z-20">                              
                 <div class="p-6 pt-3 md:p-6 sheet-card-text-panel line-bottom" style="background-color: ${predominantColor.color30}; --minha-cor: ${predominantColor.color100};">                      
-                   
-                    <div id="spell-scroll-container-${uniqueId}" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar" style="max-height: 12rem; height: 12rem">
-                       
-                        ${spellData.description ? `<div class="scroll-section" data-bg-type="main"><h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.description}</p></div>` : ''}
+                    <div id="spell-scroll-container-${uniqueId}" class="space-y-3 overflow-y-auto custom-scrollbar" style="max-height: 12rem; height: 12rem">                       
+                        ${spellData.description ? `<div class="scroll-section" data-bg-type="main"><h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3><p class="text-gray-300 text-xs leading-relaxed mt-1" style="white-space: break-spaces;">${spellData.description}</p></div>` : ''}
                         
                         ${(spellData.enhance && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="enhance" ${enhanceDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Aprimorar</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.enhance}</p></div>` : ''}
                         
@@ -157,7 +155,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
                         
                         ${aumentosHtml}
                     </div>
-                    <div class="flex row mt-2" style="justify-content: space-around;">
+                    <div class="flex row mt-2 pt-2" style="justify-content: space-around;  border-top: 1px solid ${predominantColor.color100};">
                         ${attackStatsHtml}  
                     </div>
                     ${statsHtml}
