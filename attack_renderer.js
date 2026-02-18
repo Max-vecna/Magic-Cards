@@ -75,13 +75,15 @@ export async function renderFullAttackSheet(attackData, isModal) {
     }).join('');
 
     const sheetHtml = `
-        <button id="close-attack-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-20 thumb-btn" style="display:${isModal? "flex": "none"};"><i class="fa-solid fa-xmark"></i></button>
+        <button id="close-attack-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-20 thumb-btn" style="display:${isModal? "flex": "none"};">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
         <div id="attack-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white" style="${origin}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; box-shadow: 0 0 20px ${predominantColor.color100}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto;">        
             <div class="w-full h-full" style="background: linear-gradient(-180deg, #000000a4, transparent, transparent, #0000008f, #0000008f, #000000a4); display: flex; align-items: center; justify-content: center; box-shadow: inset 0px 0px 5px black;">
                 <div class="rounded-lg" style="width: 100%; height: calc(100% - 20px); border: 3px solid ${predominantColor.color100}; margin: 10px; box-shadow: inset 0px 0px 5px black, 0px 0px 5px black;"></div>
             </div>
             
-            <div class="w-full text-left absolute top-0 line-top" style="background-color: ${predominantColor.color30}; padding-top: 20px; padding-bottom: 10px; text-align: center; --minha-cor: ${predominantColor.color100};">
+            <div class="w-full text-left absolute top-0 line-top pt-[20px] pb-[10px]" style="background-color: ${predominantColor.color30}; text-align: center; --minha-cor: ${predominantColor.color100};">
                 <h3 class="font-bold tracking-tight text-white" style="font-size: 1.3rem">${attackData.name}</h3>
             </div>
             

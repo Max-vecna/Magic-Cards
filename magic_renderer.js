@@ -97,14 +97,12 @@ export async function renderFullSpellSheet(spellData, isModal) {
     const trueDataAttr = trueImageUrl ? `data-bg-image="${trueImageUrl}"` : '';
 
     // Modificado para suportar Acerto/Dano Sem Mana
-     const attackStats = { acerto: 'ATK', critico: 'ATK s/Mana', dano: 'DMG', danoSemMana: 'DMG s/Mana'};
-     // Gera HTML para Acerto e Dano (Novo Card)
+    const attackStats = { acerto: 'ATK', critico: 'ATK s/Mana', dano: 'DMG', danoSemMana: 'DMG s/Mana'};
+    // Gera HTML para Acerto e Dano (Novo Card)
     const attackStatsHtml = Object.entries(attackStats).map(([stat, label]) => 
     {
         const baseValue = spellData[stat] || 0;
         const content = baseValue || '-';
-        const colorStyle =  predominantColor.color30 ; //dano em criatura sem mana
-
 
         const icon = stat === 'acerto' ? 'fa-dice-d20' : //dado
                      stat === 'dano' ? 'fas fa-fire' :  //dano em criatura com mana
@@ -128,8 +126,23 @@ export async function renderFullSpellSheet(spellData, isModal) {
             </div> `;
     }).join('');
 
+    const textLabel = { description: 'Descrição', enhance: 'Aprimorar', true: 'Verdadeiro'};
+    const textLabelHtml = Object.entries(textLabel).map(([stat, label]) => 
+    {
+        const baseValue = spellData[stat] || 0;
+        const content = baseValue || '-';
+
+        return `
+            <div class="scroll-section" data-bg-type="main" style="${content === '-' ? 'display: none;' : ''}"}>
+                <h3 class="text-sm font-semibold flex items-center gap-2">${label}</h3>
+                <p class="text-gray-300 text-xs leading-relaxed mt-1" style="white-space: break-spaces;text-align: justify;">${content}</p>
+            </div>`;
+    }).join('');
+
     const sheetHtml = `
-        <button id="close-spell-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-50 thumb-btn" style="display:${isModal? "block": "none"};"><i class="fa-solid fa-xmark"></i></button>
+        <button id="close-spell-sheet-btn-${uniqueId}" class="absolute top-4 right-4 bg-red-600 hover:text-white z-50 thumb-btn" style="display:${isModal? "block": "none"};">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
         <div id="spell-sheet-${uniqueId}" class="w-full h-full rounded-lg shadow-2xl overflow-hidden relative text-white transition-all duration-500" style="${origin}; width: ${finalWidth}px; height: ${finalHeight}px; ${transformProp} margin: 0 auto; box-shadow: 0 0 20px ${predominantColor.color100}; background-color: #1a1a1a;">        
             
             <div id="spell-bg-1-${uniqueId}" class="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700 ease-in-out" style="background-image: url('${mainImageUrl}'); z-index: 0; opacity: 1;"></div>
@@ -139,7 +152,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
                 <div class="rounded-lg" style="width: 100%; height: calc(100% - 20px); border: 3px solid ${predominantColor.color100}; margin: 10px;box-shadow: inset 0px 0px 5px black, 0px 0px 5px black;"></div>
             </div>
             
-            <div class="w-full text-left absolute top-0 line-top z-20" style="background-color: ${predominantColor.color30}; padding-top: 20px; padding-bottom: 10px; text-align: center; --minha-cor: ${predominantColor.color100};">
+            <div class="w-full text-left absolute top-0 line-top z-20 pt-[20px] pb-[10px]" style="background-color: ${predominantColor.color30}; text-align: center; --minha-cor: ${predominantColor.color100};">
                 <h3 class="font-bold tracking-tight text-white" style="font-size: 1.3rem">${spellData.name}</h3>
                 ${topBarHtml}
             </div>
@@ -147,11 +160,7 @@ export async function renderFullSpellSheet(spellData, isModal) {
             <div class="mt-auto  w-full text-left absolute bottom-0 z-20">                              
                 <div class="p-6 pt-3 md:p-6 sheet-card-text-panel line-bottom" style="background-color: ${predominantColor.color30}; --minha-cor: ${predominantColor.color100};">                      
                     <div id="spell-scroll-container-${uniqueId}" class="space-y-3 overflow-y-auto custom-scrollbar" style="max-height: 12rem; height: 12rem">                       
-                        ${spellData.description ? `<div class="scroll-section" data-bg-type="main"><h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3><p class="text-gray-300 text-xs leading-relaxed mt-1" style="white-space: break-spaces;text-align: justify;">${spellData.description}</p></div>` : ''}
-                        
-                        ${(spellData.enhance && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="enhance" ${enhanceDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Aprimorar</h3><p class="text-gray-300 text-xs leading-relaxed mt-1" style="white-space: break-spaces;text-align: justify;">${spellData.enhance}</p></div>` : ''}
-                        
-                        ${(spellData.true && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="true" ${trueDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Verdadeiro</h3><p class="text-gray-300 text-xs leading-relaxed mt-1" style="white-space: break-spaces;text-align: justify;">${spellData.true}</p></div>` : ''}
+                        ${textLabelHtml}
                         
                         ${aumentosHtml}
                     </div>
