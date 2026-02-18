@@ -147,11 +147,11 @@ export async function renderFullSpellSheet(spellData, isModal) {
             <div class="mt-auto  w-full text-left absolute bottom-0 z-20">                              
                 <div class="p-6 pt-3 md:p-6 sheet-card-text-panel line-bottom" style="background-color: ${predominantColor.color30}; --minha-cor: ${predominantColor.color100};">                      
                     <div id="spell-scroll-container-${uniqueId}" class="space-y-3 overflow-y-auto custom-scrollbar" style="max-height: 12rem; height: 12rem">                       
-                        ${spellData.description ? `<div class="scroll-section" data-bg-type="main"><h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3><p class="text-gray-300 text-xs leading-relaxed mt-1" style="white-space: break-spaces;">${spellData.description}</p></div>` : ''}
+                        ${spellData.description ? `<div class="scroll-section" data-bg-type="main"><h3 class="text-sm font-semibold flex items-center gap-2">Descrição</h3><p class="text-gray-300 text-xs leading-relaxed mt-1" style="white-space: break-spaces;text-align: justify;">${spellData.description}</p></div>` : ''}
                         
-                        ${(spellData.enhance && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="enhance" ${enhanceDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Aprimorar</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.enhance}</p></div>` : ''}
+                        ${(spellData.enhance && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="enhance" ${enhanceDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Aprimorar</h3><p class="text-gray-300 text-xs leading-relaxed mt-1" style="white-space: break-spaces;text-align: justify;">${spellData.enhance}</p></div>` : ''}
                         
-                        ${(spellData.true && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="true" ${trueDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Verdadeiro</h3><p class="text-gray-300 text-xs leading-relaxed mt-1 pl-6" style="white-space: break-spaces;">${spellData.true}</p></div>` : ''}
+                        ${(spellData.true && spellData.type !== 'habilidade') ? `<div class="pt-2 scroll-section" data-bg-type="true" ${trueDataAttr}><h3 class="text-sm font-semibold flex items-center gap-2">Verdadeiro</h3><p class="text-gray-300 text-xs leading-relaxed mt-1" style="white-space: break-spaces;text-align: justify;">${spellData.true}</p></div>` : ''}
                         
                         ${aumentosHtml}
                     </div>

@@ -722,7 +722,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                                 </div>
                             </div> 
 
-                            <div class="money-container rounded-full w-12 pb-2 pt-2 flex mt-4 items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="width: 42px; ${moneyContainerStyle} background: ${predominantColor.colorLight};">
+                            <div class="money-container rounded-full w-12 pb-2 pt-2 flex mt-4 items-center justify-center text-sm text-amber-300 font-bold cursor-pointer" data-action="edit-stat" data-stat-type="dinheiro" title="Alterar Dinheiro" style="width: 42px; ${moneyContainerStyle} background: ${predominantColor.colorLight}; box-shadow: 0 0 10px black;">
                                 💰$<span data-stat-current="dinheiro">${characterData.dinheiro || 0}</span>
                             </div>
                         </div>  
