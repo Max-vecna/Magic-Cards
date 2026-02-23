@@ -53,8 +53,10 @@ export async function updateStatDisplay(sheetContainer, characterData) {
     const magicItems = characterData.spells ? (await Promise.all(characterData.spells.map(id => getData('rpgSpells', id)))).filter(Boolean) : [];
     const { totalFixedBonuses } = calculateBonuses(characterData, inventoryItems, magicItems);
 
-    const permanentMaxVida = (characterData.attributes.vida || 0) + (totalFixedBonuses.vida || 0);
-    const permanentMaxMana = (characterData.attributes.mana || 0) + (totalFixedBonuses.mana || 0);
+    const { vidaBase, manaBase } = calculateClassStats(characterData);
+
+    const permanentMaxVida = vidaBase + (totalFixedBonuses.vida || 0);
+    const permanentMaxMana = manaBase + (totalFixedBonuses.mana || 0);
 
     const vidaEl = sheetContainer.querySelector('[data-stat-current="vida"]');
     if (vidaEl) vidaEl.textContent = characterData.attributes.vidaAtual || 0;
@@ -588,11 +590,13 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
         return `<div class="text-center"><span>${label}</span><br>${content}${fixedBonusHtml}</div>`;
     }).join('');
 
+     // Separate spells and skills
+    const spellsOnly = magicItems.filter(item => item.type === 'magia' || !item.type);
+    const skillsOnly = magicItems.filter(item => item.type === 'habilidade');
+
     let relationshipsHtml = '';
     if (characterData.relationships && characterData.relationships.length > 0) {
-        const relatedCharsData = (await Promise.all(
-            characterData.relationships.map(id => getData('rpgCards', id))
-        )).filter(Boolean);
+        const relatedCharsData = (await Promise.all(characterData.relationships.map(id => getData('rpgCards', id)))).filter(Boolean);
 
         if (relatedCharsData.length > 0) {
             const relationshipCardsHtml = await Promise.all(relatedCharsData.map(async (char) => {
@@ -612,9 +616,9 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
         }
     }
 
-    // Separate spells and skills
-    const spellsOnly = magicItems.filter(item => item.type === 'magia' || !item.type);
-    const skillsOnly = magicItems.filter(item => item.type === 'habilidade');
+   
+
+   
 
     let spellsGridHtml = '';
     if (spellsOnly.length > 0) {
@@ -666,8 +670,8 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     const loreMotivacaoHtml = characterData.lore?.motivacao ? `<h4>Motivação</h4><p>${characterData.lore.motivacao}</p>` : '';
 
     const hasMoney = (characterData.dinheiro || 0) > 0;
-    const hasMana = (characterData.mana) > 0;
     const moneyContainerStyle = hasMoney ? "writing-mode: vertical-rl; text-orientation: upright; top: 141px;" : "display: none;";
+    const finalRelationshipsBar = relationshipsHtml + spellsGridHtml + skillsGridHtml + attacksGridHtml + itemsGridHtml;
 
     const sheetHtml = `
         <div class="absolute top-6 right-6 z-20 flex flex-col gap-2">
@@ -733,7 +737,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
 
                     <div class="absolute bottom-[-3px] w-full" style="display: ${(isModal || isInPlay) ? 'flex' : 'none'}">
                         <div class="scrollable-content text-sm text-left ml-2 div-miniCards" style="display: flex; flex-direction: row; overflow-y: scroll;gap: 12px; scroll-snap-type: x mandatory; margin-left: 55px;">
-                            <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0.6;">
+                            <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0.6; display: ${finalRelationshipsBar ? 'flex' : 'none'} ">
                                 <!-- RELATIONSHIPS_BAR -->
                             </div>
                             <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end;">
@@ -756,7 +760,6 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
         </div>
     `;
 
-    const finalRelationshipsBar = relationshipsHtml + spellsGridHtml + skillsGridHtml + attacksGridHtml + itemsGridHtml;
     const finalHtml = sheetHtml.replace('<!-- RELATIONSHIPS_BAR -->', finalRelationshipsBar);
 
     sheetContainer.style.background = `url('${imageBack}')`;
@@ -948,4 +951,39 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
         setupStatEditor(characterData, sheetContainer);
     }
     return finalHtml;
+}
+
+function calculateClassStats(characterData) {
+    const level = parseInt(characterData.level) || 1;
+    const vig = parseInt(characterData.attributes.vigor) || 0;
+    const sab = parseInt(characterData.attributes.sabedoria) || 0;
+    const car = parseInt(characterData.attributes.carisma) || 0;
+
+    const classe = characterData.classe || 'mago';
+
+    let vidaBase = 0;
+    let manaBase = 0;
+
+    switch (classe) {
+        case 'mago':
+            vidaBase = 12 + vig + ((level - 1) * (3 + vig));
+            manaBase = 6 + sab + ((level - 1) * (4 + sab));
+            break;
+
+        case 'bardo':
+            vidaBase = 12 + vig + ((level - 1) * (4 + vig));
+            manaBase = 2 + car + ((level - 1) * (2 + car));
+            break;
+
+        case 'paladino':
+            vidaBase = 20 + vig + ((level - 1) * (4 + vig));
+            manaBase = 4 + sab + ((level - 1) * (2 + sab));
+            break;
+
+        default:
+            vidaBase = 10 + vig;
+            manaBase = 5 + sab;
+    }
+
+    return { vidaBase, manaBase };
 }
