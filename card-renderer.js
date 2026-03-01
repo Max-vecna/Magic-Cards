@@ -737,7 +737,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
 
                     <div class="absolute bottom-[-3px] w-full" style="display: ${(isModal || isInPlay) ? 'flex' : 'none'}">
                         <div class="scrollable-content text-sm text-left ml-2 div-miniCards" style="display: flex; flex-direction: row; overflow-y: scroll;gap: 12px; scroll-snap-type: x mandatory; margin-left: 55px;">
-                            <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0.6; display: ${finalRelationshipsBar ? 'flex' : 'none'} ">
+                            <div class="rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end; display: ${finalRelationshipsBar ? 'flex' : 'none'} ">
                                 <!-- RELATIONSHIPS_BAR -->
                             </div>
                             <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end;">
@@ -986,4 +986,5 @@ function calculateClassStats(characterData) {
     }
 
     return { vidaBase, manaBase };
+
 }
