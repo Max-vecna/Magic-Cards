@@ -4,23 +4,114 @@ import { showCustomAlert, showTopAlert, showCustomConfirm } from './ui_utils.js'
 
 import { renderFullItemSheet } from './item_renderer.js';
 import { renderFullSpellSheet } from './magic_renderer.js';
-import { renderFullAttackSheet } from './attack_renderer.js';
 import { renderFullCharacterSheet } from './card-renderer.js';
 let db;
 let isDriveLoaded = false;
 
 const DB_CONFIG = {
     name: 'RPGCardsDB',
-    version: 1,
+    version: 2,
     stores: {
         rpgCards: { keyPath: 'id' },
         rpgSpells: { keyPath: 'id' },
         rpgItems: { keyPath: 'id' },
         rpgAttacks: { keyPath: 'id' },
+        rpgEffects: { keyPath: 'id' },
         rpgCategories: { keyPath: 'id' },
         rpgGrimoires: { keyPath: 'id' }
     }
 };
+
+async function migrateEffectsStoreIfNeeded() {
+    // Esta migração faz 2 coisas:
+    // 1) Garante que quaisquer dados antigos (rpgSpells/rpgAttacks) existam em rpgEffects.
+    // 2) Remove os duplicados dos stores antigos, deixando apenas rpgEffects como fonte de verdade.
+
+    const [effects, oldSpells, oldAttacks] = await Promise.all([
+        getData('rpgEffects'),
+        getData('rpgSpells'),
+        getData('rpgAttacks')
+    ]);
+
+    const existingIds = new Set((Array.isArray(effects) ? effects : []).map(e => e.id));
+    const toUpsert = [];
+
+    if (Array.isArray(oldSpells) && oldSpells.length > 0) {
+        oldSpells.forEach(s => {
+            // Mantém magia/habilidade conforme já existe no card
+            const base = { ...s };
+            base.type = base.type || 'magia';
+
+            if (!existingIds.has(base.id)) {
+                toUpsert.push(base);
+                existingIds.add(base.id);
+            }
+        });
+    }
+
+    if (Array.isArray(oldAttacks) && oldAttacks.length > 0) {
+        oldAttacks.forEach(a => {
+            const base = {
+                id: a.id,
+                name: a.name || '',
+                description: a.description || '',
+
+                circle: 0,
+                execution: a.execution || '',
+                manaCost: 0,
+                range: a.range || '',
+                target: a.target || '',
+                duration: a.duration || '',
+                resistencia: a.resistencia || '',
+                enhance: a.enhance || '',
+                true: a.true || '',
+                aumentos: Array.isArray(a.aumentos) ? a.aumentos : [],
+
+                type: 'ataque',
+                characterId: a.characterId || '',
+                categoryId: a.categoryId || '',
+
+                acerto: a.acerto || '',
+                dano: a.dano || '',
+                critico: a.critico || '',
+                danoSemMana: a.danoSemMana || '',
+
+                image: a.image || null,
+                imageMimeType: a.imageMimeType || null,
+                enhanceImage: a.enhanceImage || null,
+                enhanceImageMimeType: a.enhanceImageMimeType || null,
+                trueImage: a.trueImage || null,
+                trueImageMimeType: a.trueImageMimeType || null,
+
+                predominantColor: a.predominantColor || null
+            };
+
+            if (!existingIds.has(base.id)) {
+                toUpsert.push(base);
+                existingIds.add(base.id);
+            }
+        });
+    }
+
+    // 1) Upsert no novo store
+    for (const eff of toUpsert) {
+        await saveData('rpgEffects', eff);
+    }
+
+    // 2) Sempre que houver dados antigos, limpa os stores antigos para evitar duplicação
+    // (principalmente após restaurar backup de versões antigas).
+    const shouldClearOldSpells = Array.isArray(oldSpells) && oldSpells.length > 0;
+    const shouldClearOldAttacks = Array.isArray(oldAttacks) && oldAttacks.length > 0;
+
+    if (shouldClearOldSpells) {
+        const tx = db.transaction('rpgSpells', 'readwrite');
+        await new Promise(resolve => { tx.objectStore('rpgSpells').clear().onsuccess = resolve; });
+    }
+    if (shouldClearOldAttacks) {
+        const tx = db.transaction('rpgAttacks', 'readwrite');
+        await new Promise(resolve => { tx.objectStore('rpgAttacks').clear().onsuccess = resolve; });
+    }
+}
 
 // --- Funções Auxiliares de Conversão (Reutilizadas) ---
 function arrayBufferToBase64(buffer) {
@@ -47,22 +138,21 @@ function base64ToArrayBuffer(base64) {
 
 async function createMiniCards()
 {
-    const [characters, spells, items, attacks] = await Promise.all([getData('rpgCards'), getData('rpgSpells'), getData('rpgItems'), getData('rpgAttacks') ]);
+    const [characters, effects, items] = await Promise.all([getData('rpgCards'), getData('rpgEffects'), getData('rpgItems') ]);
 
     let allCardsHtml = '<div id="characters-grid" class="relationships-grid relationships-grid-slide expanded" style="overflow-y: auto; ">';
 
-    let skillsGridHtml = '';
-    if (spells.length > 0) {
-        const skillCardsHtml = await Promise.all(spells.map(async (skill) => {
-            const miniSheetHtml = await renderFullSpellSheet(skill, false);
+    if (effects && effects.length > 0) {
+        const effectCardsHtml = await Promise.all(effects.map(async (eff) => {
+            const miniSheetHtml = await renderFullSpellSheet(eff, false);
             return `
-                <div class="related-spell-grid-item" data-id="${skill.id}" data-type="skill" style="margin-right: -15px;">
+                <div class="related-spell-grid-item" data-id="${eff.id}" data-type="effect" style="margin-right: -15px;">
                     ${miniSheetHtml}
                 </div>
             `;
         }));
 
-        allCardsHtml += ` ${skillCardsHtml.join('')}  `;
+        allCardsHtml += ` ${effectCardsHtml.join('')}  `;
     }
 
     let charactersGridHtml = '';
@@ -93,20 +183,7 @@ async function createMiniCards()
         allCardsHtml += ` ${itemsCardsHtml.join('')} `;
     }
 
-    let attackGridHtml = '';
-    if (attacks.length > 0) {
-        const attackCardsHtml = await Promise.all(attacks.map(async (attack) => {
-            const miniSheetHtml = await renderFullAttackSheet(attack, false);
-            return `
-                <div class="related-attack-grid-item" data-id="${attack.id}" data-type="attacks" style="margin-right: -15px;">
-                    ${miniSheetHtml}
-                </div>
-            `;
-        }));
-
-       allCardsHtml += ` ${attackCardsHtml.join('')} </div> `;
-    }
-
+  
     return allCardsHtml;
 
 }
@@ -246,6 +323,8 @@ export async function openDatabase() {
         };
     });
 
+    await migrateEffectsStoreIfNeeded();
+
     // 2. Inicializa o Drive em segundo plano
     initDrive().then(() => {
         console.log("Drive API Initialized");
@@ -376,6 +455,8 @@ export async function manualLoadFromDrive() {
             if (cloudData) {
                 updateProgress("Restaurando banco de dados...", 98);
                 await restoreDataFromJSON(cloudData);
+
+                await migrateEffectsStoreIfNeeded();
                 
                 success = true;
                 updateProgress("Concluído! Recarregando...", 100);
@@ -488,6 +569,8 @@ export async function importDatabase(file, onProgress = () => {}) {
         
         updateProgress("Restaurando dados...", 60);
         await restoreDataFromJSON(importedData);
+
+        await migrateEffectsStoreIfNeeded();
         
         updateProgress("Importação concluída!", 100);
         setTimeout(hideProgressModal, 500);
@@ -561,9 +644,8 @@ export async function exportImagesAsPng(onProgress = () => {}) {
         }
         
         await processRawImages('rpgCards', 'imagens_personagens');
-        await processRawImages('rpgSpells', 'imagens_magias_habilidades');
+        await processRawImages('rpgEffects', 'imagens_efeitos');
         await processRawImages('rpgItems', 'imagens_itens');
-        await processRawImages('rpgAttacks', 'imagens_ataques');
 
         localOnProgress("A carregar imagens do grimório...");
         const allGrimoires = await getData('rpgGrimoires');

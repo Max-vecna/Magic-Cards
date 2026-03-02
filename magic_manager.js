@@ -219,7 +219,7 @@ export async function saveSpellCard(spellForm, type) {
 
     let existingData = null;
     if (currentEditingSpellId) {
-        existingData = await getData('rpgSpells', currentEditingSpellId);
+        existingData = await getData('rpgEffects', currentEditingSpellId);
     }
 
     const imageBuffer = spellImageFile ? await readFileAsArrayBuffer(spellImageFile) : (existingData ? existingData.image : null);
@@ -273,9 +273,9 @@ export async function saveSpellCard(spellForm, type) {
     }
 
     spellData.predominantColor = await calculateColor(spellData.image, spellData.imageMimeType);
-    await saveData('rpgSpells', spellData);
+    await saveData('rpgEffects', spellData);
 
-    const eventType = type === 'habilidade' ? 'habilidades' : 'magias';
+    const eventType = type === 'habilidade' ? 'habilidades' : (type === 'ataque' ? 'ataques' : 'magias');
     document.dispatchEvent(new CustomEvent('dataChanged', { detail: { type: eventType } }));
 
     spellForm.reset();
@@ -290,7 +290,7 @@ export async function saveSpellCard(spellForm, type) {
 }
 
 export async function editSpell(spellId) {
-    const spellData = await getData('rpgSpells', spellId);
+    const spellData = await getData('rpgEffects', spellId);
     if (!spellData) return;
 
     currentEditingSpellId = spellId;
@@ -355,12 +355,12 @@ export async function editSpell(spellId) {
 
 export async function removeSpell(spellId) {
     if (window.confirm('Tem certeza que deseja excluir este item?')) {
-        await removeData('rpgSpells', spellId);
+        await removeData('rpgEffects', spellId);
     }
 }
 
 export async function exportSpell(spellId) {
-    const spellData = await getData('rpgSpells', spellId);
+    const spellData = await getData('rpgEffects', spellId);
     if (spellData) {
         const dataToExport = { ...spellData };
         if (dataToExport.image) dataToExport.image = arrayBufferToBase64(dataToExport.image);
@@ -372,8 +372,9 @@ export async function exportSpell(spellId) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        const safeName = (dataToExport.name || 'item').replace(/\s+/g, '_');
-        a.download = `${safeName}.json`;
+        const safeName = (dataToExport.name || 'efeito').replace(/\s+/g, '_');
+        const prefix = dataToExport.type === 'habilidade' ? 'habilidade' : (dataToExport.type === 'ataque' ? 'ataque' : 'magia');
+        a.download = `${prefix}_${safeName}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -392,14 +393,16 @@ export async function importSpell(file, type) {
                 }
 
                 importedSpell.id = Date.now().toString();
-                importedSpell.type = type === 'habilidades' ? 'habilidade' : 'magia';
+                if (type === 'habilidades') importedSpell.type = 'habilidade';
+                else if (type === 'ataques') importedSpell.type = 'ataque';
+                else importedSpell.type = 'magia';
 
                 if (importedSpell.image) importedSpell.image = base64ToArrayBuffer(importedSpell.image);
                 if (importedSpell.enhanceImage) importedSpell.enhanceImage = base64ToArrayBuffer(importedSpell.enhanceImage);
                 if (importedSpell.trueImage) importedSpell.trueImage = base64ToArrayBuffer(importedSpell.trueImage);
 
                 importedSpell.predominantColor = await calculateColor(importedSpell.image, importedSpell.imageMimeType);
-                await saveData('rpgSpells', importedSpell);
+                await saveData('rpgEffects', importedSpell);
                 resolve(importedSpell);
             } catch (error) {
                 console.error("Erro ao importar item:", error);

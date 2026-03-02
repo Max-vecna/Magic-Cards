@@ -139,7 +139,7 @@ function getMergedPericiasData() {
 export function getAumentosData() {
     const mergedPericias = getMergedPericiasData();
     const aumentosData = {
-        "Status": ["Vida", "Mana", "Armadura", "Esquiva", "Bloqueio", "Deslocamento"],
+        "Status": ["Vida", "Mana", "Armadura", "Esquiva", "Bloqueio", "Deslocamento", "CD"],
         "Atributos": ["Agilidade", "Carisma", "Força", "Inteligência", "Sabedoria", "Vigor"],
         "Perícias": {}
     };
@@ -484,7 +484,7 @@ export async function editCard(cardId) {
 
     if (cardData.spells) {
         for (const magicId of cardData.spells) {
-            const magicData = await getData('rpgSpells', magicId);
+            const magicData = await getData('rpgEffects', magicId);
             if (magicData) {
                 const renderType = magicData.type === 'habilidade' ? 'skill' : 'magic';
                 createSelectedElement(magicData, renderType);
@@ -494,7 +494,7 @@ export async function editCard(cardId) {
 
     if (cardData.attacks) {
         for (const attackId of cardData.attacks) {
-            const attackData = await getData('rpgAttacks', attackId);
+            const attackData = await getData('rpgEffects', attackId);
             if (attackData) createSelectedElement(attackData, 'attack');
         }
     }

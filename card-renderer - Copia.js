@@ -19,30 +19,6 @@ for (const attribute in PERICIAS_DATA) {
     });
 }
 
-function normalizeKey(name) {
-    return (name || '').toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-// Converte valores como "4+1" em número (5) e sinaliza que havia bônus.
-// Se não for um formato simples, retorna null.
-function parseAdditiveString(value) {
-    if (value === null || value === undefined) return { total: null, hasBonus: false };
-    const s = String(value).replace(/\s+/g, '');
-    const m = s.match(/^(-?\d+)(?:\+(-?\d+))$/);
-    if (!m) return { total: null, hasBonus: false };
-    const a = parseInt(m[1], 10);
-    const b = parseInt(m[2], 10);
-    if (!Number.isFinite(a) || !Number.isFinite(b)) return { total: null, hasBonus: false };
-    return { total: a + b, hasBonus: b !== 0 };
-}
-
-// Formata um número total e aplica cor quando houve bônus.
-function formatTotal(total, hasBonus, suffix = '') {
-    if (total === null || total === undefined) return '-';
-    const txt = `${total}${suffix}`;
-    return hasBonus ? `<span class="text-yellow-400 font-bold">${txt}</span>` : txt;
-}
-
 function calculateBonuses(characterData, inventoryItems, magicItems) {
     const totalFixedBonuses = {
         vida: 0, mana: 0, armadura: 0, esquiva: 0, bloqueio: 0, deslocamento: 0,
@@ -55,7 +31,7 @@ function calculateBonuses(characterData, inventoryItems, magicItems) {
         if (Array.isArray(source.aumentos)) {
             source.aumentos.forEach(aumento => {
                 if (aumento.tipo === 'fixo') {
-                    const statName = normalizeKey(aumento.nome);
+                    const statName = (aumento.nome || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     if (totalFixedBonuses.hasOwnProperty(statName)) {
                         totalFixedBonuses[statName] += (aumento.valor || 0);
                     } else {
@@ -128,13 +104,12 @@ export async function updateStatDisplay(sheetContainer, characterData) {
                 if (['armadura', 'esquiva', 'bloqueio', 'deslocamento'].includes(stat)) {
                     const numVal = parseInt(baseValue) || 0;
                     const fixedBonus = totalFixedBonuses[stat] || 0;
+                    fixedBonusHtml = fixedBonus !== 0 ? `<span class="text-green-400 font-bold ml-1">${fixedBonus > 0 ? '+' : ''}${fixedBonus}</span>` : '';
                     const suffix = stat === 'deslocamento' ? 'm' : '';
-                    const total = numVal + fixedBonus;
-                    content = formatTotal(total, fixedBonus !== 0, suffix);
+                    content = `${numVal}${suffix}`;
                 } else {
-                    // Para Acerto e Dano (strings), se vier no formato "4+1" somamos e destacamos.
-                    const { total, hasBonus } = parseAdditiveString(baseValue);
-                    content = (total !== null) ? formatTotal(total, hasBonus) : (baseValue || '-');
+                    // Para Acerto e Dano, exibimos como está (string)
+                    content = baseValue || '-';
                 }
 
                 // Preserva a cor específica para ATK e DMG
@@ -150,10 +125,10 @@ export async function updateStatDisplay(sheetContainer, characterData) {
         // Atualiza CD (Classe de Dificuldade)
         const sabTotal = (parseInt(characterData.attributes.sabedoria) || 0) + (totalFixedBonuses.sabedoria || 0);
         const cdFixed = (totalFixedBonuses.cd || 0);
-        const cdValue = 10 + (parseInt(characterData.level) || 0) + sabTotal + cdFixed;
-        const cdBonusHtml = cdFixed !== 0 ? ` <span class="text-green-400 font-semibold">${cdFixed > 0 ? '+' : ''}${cdFixed}</span>` : '';
+    const cdValue = 10 + (parseInt(characterData.level) || 0) + sabTotal + cdFixed;
+    const cdBonusHtml = cdFixed !== 0 ? ` <span class="text-green-400 font-semibold">${cdFixed > 0 ? '+' : ''}${cdFixed}</span>` : '';
         const cdEl = Array.from(statElements).find(e => e.textContent.includes('CD'));
-        if(cdEl) cdEl.innerHTML = `CD<br>${formatTotal(cdValue, cdFixed !== 0)}`;
+        if(cdEl) cdEl.innerHTML = `CD<br>${cdValue}`;
     }
 
     const mainAttributes = ['agilidade', 'carisma', 'forca', 'inteligencia', 'sabedoria', 'vigor'];
@@ -179,7 +154,7 @@ export async function updateStatDisplay(sheetContainer, characterData) {
         if (barEl) barEl.style.width = `${percentage}%`;
         
         const valueEl = attrContainer.querySelector('.text-xs.font-bold.ml-auto');
-        if(valueEl) valueEl.innerHTML = formatTotal(totalValue, fixedBonus !== 0);
+        if(valueEl) valueEl.innerHTML = `${baseValue}${fixedBonusHtml}`;
     });
 }
 
@@ -516,8 +491,7 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     const maxAttributeValue = Math.max(...currentAttributeValues, 1);
 
     const sabTotal = (parseInt(characterData.attributes.sabedoria) || 0) + (totalFixedBonuses.sabedoria || 0);
-    const cdFixed = (totalFixedBonuses.cd || 0);
-    const cdValue = 10 + (parseInt(characterData.level) || 0) + sabTotal + cdFixed;
+    const cdValue = 10 + (parseInt(characterData.level) || 0) + sabTotal;
     const palette = { borderColor: predominantColor.colorLight };
 
     const origin = isModal || isInPlay ? "" : "transform-origin: top left";
@@ -549,9 +523,8 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
         const sortedAttributes = Object.keys(groupedPericias).sort();
         periciasHtml = sortedAttributes.map(attribute => {
             const periciasList = groupedPericias[attribute].sort((a,b) => a.name.localeCompare(b.name)).map(p => {
-                const total = (parseInt(p.base) || 0) + (parseInt(p.bonus) || 0);
-                const valHtml = formatTotal(total, (parseInt(p.bonus) || 0) !== 0);
-                return `<span class="text-xs text-gray-300">${p.name} ${valHtml};</span>`;
+                const bonusHtml = p.bonus !== 0 ? ` <span class="text-green-400 font-semibold">${p.bonus > 0 ? '+' : ''}${p.bonus}</span>` : '';
+                return `<span class="text-xs text-gray-300">${p.name} ${p.base}${bonusHtml};</span>`;
             }).join(' ');
             return `<div class="text-left mt-1"><p class="text-xs font-bold text-gray-200 uppercase" style="font-size: 11px;">${attribute}</p><div class="flex flex-wrap gap-x-2 gap-y-1 mb-1">${periciasList}</div></div>`;
         }).join('');
@@ -582,17 +555,18 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                      stat === 'critico' ? 'fa-crosshairs' : //critico
                      stat === 'danoSemMana' ? 'fa-skull' : ""; //dano em criatura sem mana
 
-        const parsed = parseAdditiveString(baseValue);
-        const showValue = (parsed.total !== null)
-            ? formatTotal(parsed.total, parsed.hasBonus)
-            : (content || '-');
-
         return `
             <div style="position: relative; transform: scale(.8); display: ${content === "-" ? 'none' : 'block'}" class="mt-4 flex flex-col items-center">
                 <i class="fas ${icon} text-5xl" style="background: ${colorStyle}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(2px 4px 6px black);"></i>
                 <div class="absolute inset-0 flex flex-col items-center justify-center text-white text-xs pointer-events-none" style="margin: auto;">
-                    <div class="text-center text-sm font-bold">
-                        ${showValue}
+                    <div class="text-center text-sm">
+                        <span class="font-bold">
+                            ${content.split("+")[0] || ""}
+                        </span>
+                        <hr style="width: 100%;">
+                        <span style="bottom: 12px;" class="font-bold">
+                            +${content.split("+")[1] || ""}
+                        </span>
                     </div>
                 </div>
             </div> `;
@@ -602,20 +576,19 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     // Gera HTML para Defesa (Card Existente)
     const defenseStatsHtml = Object.entries(defenseStats).map(([stat, label]) => {
         const baseValue = characterData.attributes[stat] || 0;
+        let content = baseValue;
+        let fixedBonusHtml = '';
 
         if (['armadura', 'esquiva', 'bloqueio', 'deslocamento'].includes(stat)) {
-            const numVal = parseInt(baseValue) || 0;
-            const fixedBonus = totalFixedBonuses[stat] || 0;
-            const suffix = stat === 'deslocamento' ? 'm' : '';
-            const total = numVal + fixedBonus;
-            const content = formatTotal(total, fixedBonus !== 0, suffix);
-            return `<div class="text-center"><span>${label}</span><br>${content}</div>`;
+             const fixedBonus = totalFixedBonuses[stat] || 0;
+             fixedBonusHtml = fixedBonus !== 0 ? `<span class="text-green-400 font-bold ml-1">${fixedBonus > 0 ? '+' : ''}${fixedBonus}</span>` : '';
+             const suffix = stat === 'deslocamento' ? 'm' : '';
+             content = `${baseValue}${suffix}`;
+        } else {
+             content = baseValue || '-';
         }
-
-        // Fallback (não esperado aqui)
-        const { total, hasBonus } = parseAdditiveString(baseValue);
-        const content = (total !== null) ? formatTotal(total, hasBonus) : (baseValue || '-');
-        return `<div class="text-center"><span>${label}</span><br>${content}</div>`;
+        
+        return `<div class="text-center"><span>${label}</span><br>${content}${fixedBonusHtml}</div>`;
     }).join('');
 
      // Separate spells and skills
@@ -709,7 +682,11 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                         <div class="div-combat-stats grid grid-row-6 gap-y-2 text-xs absolute top-2" style="border-radius: 28px 5px 28px 5px; background: ${predominantColor.colorLight}; padding: 10px; width: 42px; justify-content: space-evenly; box-shadow: 0 0 10px black;">
                             <div class="text-center font-bold" style="color: rgb(0 247 85);">LV<br>${characterData.level || 0}</div>
                             ${defenseStatsHtml}
-                            <div class="text-center">CD<br>${formatTotal(cdValue, cdFixed !== 0)}</div>
+                            <div class="text-center">
+                                CD
+                                <br>${cdValue}
+                                <span class="text-green-400 font-semibold">${totalFixedBonuses.cd > 0 ? '+' : ''}${totalFixedBonuses.cd}</span>
+                            </div>
                         </div>
 
                         <div class="grid grid-row-6 gap-y-2 text-xs absolute bottom-2 div-Stats" style="border-radius: 28px 5px 5px 5px; background: ${predominantColor.colorLight}; padding: 10px; width: 42px; box-shadow: 0 0 10px black; ">
@@ -717,8 +694,8 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
                             const baseValue = parseInt(characterData.attributes[key]) || 0;
                             const fixedBonus = totalFixedBonuses[key] || 0;
                             const fixedBonusHtml = fixedBonus !== 0 ? ` <span class="text-green-400 font-semibold">${fixedBonus > 0 ? '+' : ''}${fixedBonus}</span>` : '';
-                            return `
-                                <label class="text-center" title="${key}">${formatTotal(baseValue + fixedBonus, fixedBonus !== 0)}<br>${key.slice(0, 3).toUpperCase()}</label>
+                            return `                        
+                                <label class="text-center" title="${key}">${baseValue}${fixedBonusHtml}<br>${key.slice(0, 3).toUpperCase()}</label>                                                      
                             `;
                             }).join('')}
                         </div>
@@ -762,8 +739,8 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
 
                     <div class="absolute bottom-[-3px] w-full" style="display: ${(isModal || isInPlay) ? 'flex' : 'none'}">
                         <div class="scrollable-content text-sm text-left ml-2 div-miniCards" style="display: flex; flex-direction: row; overflow-y: scroll;gap: 12px; scroll-snap-type: x mandatory; margin-left: 55px;">
-                            <div class="pb-4 rounded-3xl w-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end;">
-                                <div class="pericias-scroll-area flex flex-col gap-2 px-2 h-full" style="overflow-y: auto;">
+                            <div class="pb-4 rounded-3xl w-full h-full" style="scroll-snap-align: start;flex-shrink: 0;min-width: 100%; border-color: ${palette.borderColor}; position: relative; z-index: 1; overflow-y: visible; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div class="pericias-scroll-area flex flex-col gap-2 px-2 h-full" style="overflow-y: auto; justify-content: space-around;">
                                     ${periciasHtml}
                                 </div>
                             </div>
@@ -792,6 +769,21 @@ export async function renderFullCharacterSheet(characterData, isModal, isInPlay,
     if (isInPlay) {
         sheetContainer.classList.add('in-play-animation');
     }
+
+    const setupGridExpand = (gridId) => {
+        const grid = sheetContainer.querySelector(`#${gridId}`);
+        if (grid) {
+            grid.addEventListener('click', (e) => {
+                if (e.target === grid) grid.classList.toggle('expanded');
+            });
+        }
+    };
+
+    setupGridExpand(`relationships-grid-${uniqueId}`);
+    setupGridExpand(`spells-grid-${uniqueId}`);
+    setupGridExpand(`skills-grid-${uniqueId}`);
+    setupGridExpand(`attacks-grid-${uniqueId}`);
+    setupGridExpand(`items-grid-${uniqueId}`);
 
  
 

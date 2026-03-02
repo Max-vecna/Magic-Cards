@@ -334,7 +334,7 @@ body:not(.dark) #sidebar-buttons .sidebar-btn {
   position: relative;
   z-index: 10;
 
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  /* transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;*/
   overflow: visible; /* Garante que o menu não seja cortado */ /* Garante que o menu não seja cortado */
 }
 
@@ -1102,4 +1102,34 @@ body:not(.dark) .text-white { color: var(--text-color) !important; }
   /* 2. Apply the backdrop blur */
   backdrop-filter: blur(10px); 
   -webkit-backdrop-filter: blur(10px); /* For Safari support */
+}
+
+/* === AUTO SLIDE MINI CARDS === */
+
+.relationships-grid-slide {
+    overflow: hidden;
+    position: relative;
+}
+
+.relationships-grid-slide.expanded {
+    animation: auto-slide-cards 50s linear infinite;
+    width: max-content;
+}
+
+/* Pausa ao passar o mouse (opcional, mas recomendado) */
+.relationships-grid-slide.expanded:hover {
+    animation-play-state: paused;
+}
+
+@keyframes auto-slide-cards {
+    0% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(-50%);
+    }
+    100%
+    { 
+        transform: translateX(0);
+    }
 }

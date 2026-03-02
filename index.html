@@ -13,7 +13,6 @@
     <script src="https://accounts.google.com/gsi/client"></script>
 
     <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="./animations.css">
 </head>
 <body class="overflow-hidden dark"> <!-- Inicia com o tema escuro por padrão -->
     <!-- Splash Screen -->
@@ -99,10 +98,7 @@
             <button id="export-images-btn" class="desktop-action-button" title="Baixar Imagens">
                 <i class="fas fa-file-image"></i>
             </button>
-            <button id="aspect-ratio-btn" class="desktop-action-button" title="Ajustar Tamanho dos Cards">
-                <i class="fas fa-expand-alt"></i>
-            </button>
-        </div>
+</div>
     </aside>
 
      <!-- Sliding Actions Sidebar for Mobile -->
@@ -142,11 +138,7 @@
      <!-- Sliding Actions Sidebar for Mobile (Right) -->
     <div id="actions-sidebar-1" class="fixed top-1/2 -translate-y-1/2 z-50 flex items-center md:hidden">
         <div id="sidebar-buttons" class="flex flex-col gap-3 p-2 rounded-r-lg shadow-lg">
-            <button id="aspect-ratio-btn-mobile" class="sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Ajustar Tamanho dos Cards">
-                <i class="fas fa-expand-alt"></i>
-            </button>
-
-            <hr>
+<hr>
             <button  class=" sidebar-btn w-8 h-8 rounded-full font-bold flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform" title="Exportar Banco de Dados"  data-target="grimorio" title="Grimório">
                <i class="fas fa-book-open"></i>
             </button>
@@ -726,31 +718,7 @@
             </div>
         </div>
     </div>
-
-    <div id="aspect-ratio-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-[120000000000000000000] p-4">
-        <div class="bg-gray-800 text-white rounded-lg shadow-2xl p-6 w-full max-w-sm border border-gray-700">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-indigo-300">Ajustar Proporção dos Cards</h3>
-                <button id="aspect-ratio-close-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
-            </div>
-            <div class="space-y-4">
-                <p class="text-sm text-gray-400">Selecione uma proporção pré-definida ou insira uma personalizada (ex: 16x9).</p>
-                <div id="aspect-ratio-options" class="grid grid-cols-2 gap-2">
-                    <button class="aspect-ratio-option py-2 px-4 rounded-lg bg-gray-700 hover:bg-indigo-600" data-aspect="1.6">16:10 (Padrão)</button>
-                    <button class="aspect-ratio-option py-2 px-4 rounded-lg bg-gray-700 hover:bg-indigo-600" data-aspect="1.3333">4:3 (Clássico)</button>
-                    <button class="aspect-ratio-option py-2 px-4 rounded-lg bg-gray-700 hover:bg-indigo-600" data-aspect="1">1:1 (Quadrado)</button>
-                    <button class="aspect-ratio-option py-2 px-4 rounded-lg bg-gray-700 hover:bg-indigo-600" data-aspect="0.5625">9:16 (Story)</button>
-                </div>
-                <div>
-                    <label for="custom-aspect-ratio" class="block text-sm font-semibold mb-1">Proporção Personalizada:</label>
-                    <input type="text" id="custom-aspect-ratio" placeholder="Ex: 16x9" class="w-full px-4 py-2 bg-gray-900 text-white rounded-lg border border-gray-600">
-                </div>
-                <button id="save-aspect-ratio-btn" class="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 font-bold">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hidden file input for DB import -->
+<!-- Hidden file input for DB import -->
     <input type="file" id="import-db-input" accept=".json" class="hidden">
 
     <!-- Mobile Bottom Navigation Menu -->
@@ -789,8 +757,6 @@
     <script type="module" src="./item_manager.js"></script>
     <script type="module" src="./attack_renderer.js"></script>
     <script type="module" src="./attack_manager.js"></script>
-    <script type="module" src="./theme_manager.js"></script>
-    <script type="module" src="./sidebar_manager.js"></script>
     <script type="module" src="./grimoire_manager.js"></script>
     <script type="module" src="./navigation_manager.js"></script>
 
